@@ -3,12 +3,14 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <sys/select.h>
 
 void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score);
 void draw_menu(WINDOW *window, char options[][20], int option_count, int selected);//draw_menu(WINDOW *window, int *game_in_progress, int game[][5]);
-void draw_game(WINDOW *window, int game[5][5]);
+void draw_game(WINDOW *window, int game[][5]);
 void int_to_string(char *s, int val, int format);
 void rectangle(int x, int y, int size_x, int size_y);
+char auto_move(int game[][5]);
 
 void draw_screen_border(WINDOW *window)
 {
@@ -77,30 +79,8 @@ char* datestr(struct tm t, char* date)
     return date;
 }
 
-void info_panel(int score)
+void print_valid_input(int x, int y)
 {
-	char date[100], time_now[100], score_text[100];
-	struct tm *time_p;
-	int x, y, size_x, size_y;
-	
-	time_t t = time(NULL);
-	time_p = localtime(&t);
-	timestr(*time_p, time_now);
-	datestr(*time_p, date);
-	int_to_string(score_text, score, 2);
-	attron(COLOR_PAIR(3));
-
-	getmaxyx(stdscr, size_y, size_x);
-	size_x = 20;
-	size_y -= 4;
-	x = 2;
-	y = 2;
-	rectangle(1, 1, size_x, size_y);
-	mvaddstr(y, x, date);
-	mvaddstr(y + 1, x, time_now);
-	mvaddstr(y + 3, x, "Score: ");
-	mvaddstr(y + 3, x + strlen("Score: "), score_text);
-	y += 5;
 	mvaddstr(y, x, "Valid input: ");
 	y++;
 	mvaddch(y, x, ACS_UARROW);
@@ -116,6 +96,53 @@ void info_panel(int score)
 	mvaddstr(y, x + 1, " - move right");
 	y++;
 	mvaddstr(y, x, "Q - quit");
+}
+
+void info_panel(int score, int status)
+{
+	char date[100], time_now[100], score_text[100];
+	struct tm *time_p;
+	int x, y, size_x, size_y;
+	int key;
+
+	getmaxyx(stdscr, size_y, size_x);
+	size_x = 20;
+	size_y -= 4;
+	x = 2;
+	y = 2;
+
+	// get time
+	time_t t = time(NULL);
+	time_p = localtime(&t);
+	timestr(*time_p, time_now);
+	datestr(*time_p, date);
+	int_to_string(score_text, score, 2);
+	
+	attron(COLOR_PAIR(3));
+	// print date, time and score
+	rectangle(1, 1, size_x, size_y);
+	mvaddstr(y, x, date);
+	mvaddstr(y + 1, x, time_now);
+	mvaddstr(y + 3, x, "Score: ");
+	mvaddstr(y + 3, x + strlen("Score: "), score_text);
+	y += 5;
+
+	if (status == 0)
+		print_valid_input(x, y); // if game is not over, print valid commands
+	else if (status == -1)
+		mvaddstr(y, x, "Game over!");
+	else if (status == 1)
+		mvaddstr(y, x, "Win!");
+	if (status == 1 || status == -1) {
+		y++;
+		// if game is over, wait until Q is pressed
+		while (1) {
+			mvaddstr(y, x, "Press Q to exit");
+			key = getch();
+			if (key == 'Q')
+				break;
+		}
+	}
 }
 
 void rectangle(int x, int y, int size_x, int size_y)
@@ -166,7 +193,7 @@ int val_color_id(int val)
 	return i;
 }
 
-void draw_game(WINDOW *window, int game[5][5])
+void draw_game(WINDOW *window, int game[][5])
 {
 	clear();
 	int max_x, max_y;
@@ -473,42 +500,161 @@ void generate_rand_cell(int game[][5])
 	}
 }
 
+char auto_move(int game[][5])
+{
+	int game_copy[5][5];
+	int i, j;
+	int score_copy = 0;
+	int total_cell_min = 16, total_cell = 0;
+	char operation = '\0';
+	int valid = 0;
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			game_copy[i][j] = game[i][j];	
+	valid = move_down(game_copy, &score_copy);
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game_copy[i][j] != 0)
+				total_cell++;
+	if (valid == 1 && total_cell <= total_cell_min) {
+		total_cell_min = total_cell;
+		operation = 'D';
+	}
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			game_copy[i][j] = game[i][j];
+	total_cell = 0;
+	valid = move_up(game_copy, &score_copy);
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game_copy[i][j] != 0)
+				total_cell++;
+	if (valid == 1 && total_cell <= total_cell_min) {
+		total_cell_min = total_cell;
+		operation = 'U';
+	}
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			game_copy[i][j] = game[i][j];
+	total_cell = 0;
+	valid = move_right(game_copy, &score_copy);
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game_copy[i][j] != 0)
+				total_cell++;
+	if (valid == 1 && total_cell <= total_cell_min) {
+		total_cell_min = total_cell;
+		operation = 'R';
+	}
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			game_copy[i][j] = game[i][j];
+	total_cell = 0;
+	valid = move_left(game_copy, &score_copy);
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game_copy[i][j] != 0)
+				total_cell++;
+	if (valid == 1 && total_cell <= total_cell_min) {
+		total_cell_min = total_cell;
+		operation = 'L';
+	}
+
+	return operation;
+}
+
+int check_winner(int game[][5])
+{
+	int i,j;
+	char move = auto_move(game);
+
+	if (move == '\0')
+		return -1; 	// lose
+
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game[i][j] == 2048)
+				return 1; // win
+
+	// continue game
+	return 0;
+}
+
 void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score)
 {
 	int key;
 	int valid;
+	char opt_auto_move;
+	time_t curr_time;
+	time_t start_time;
+	int timeout_sec = 10;
+	int game_status;
 
 	if (*game_in_progress == 0) {
 		*game_in_progress = 1;
 		generate_rand_cell(game);
 		generate_rand_cell(game);
 	}
+
 	// draw game layout
 	draw_game(window, game);
+	start_time = time(NULL);
 	while(1) {
+		game_status = check_winner(game);
+		if (game_status == 1) {
+			break;
+		}
+		else if (game_status == -1) {
+			break;
+		}
+		curr_time = time(NULL);
    		nodelay(stdscr, TRUE);
-		info_panel(*score);
+		info_panel(*score, game_status);
 		valid = 0;
 		key = getch();
-		if (key == 'Q')
-			break;
-		else if (key == KEY_DOWN)
-			valid = move_down(game, score);
-		else if (key == KEY_UP)
-			valid = move_up(game, score);
-		else if (key == KEY_LEFT)
-			valid = move_left(game, score);
-		else if (key == KEY_RIGHT)
-			valid = move_right(game, score);
+		// if there was no input for timeout_sec seconds, move automatically		
+		if (difftime(curr_time, start_time) >= timeout_sec){
+			opt_auto_move = auto_move(game);
+			if (opt_auto_move == 'U')
+				key = KEY_UP;
+			else if (opt_auto_move == 'D')
+				key = KEY_DOWN;
+			else if (opt_auto_move == 'R')
+				key = KEY_RIGHT;
+			else if (opt_auto_move == 'L')
+				key = KEY_LEFT;
+		}
+		if (key > 0) {
+			start_time = time(NULL);
+			if (key == 'Q')
+				break;
+			else if (key == KEY_DOWN)
+				valid = move_down(game, score);
+			else if (key == KEY_UP)
+				valid = move_up(game, score);
+			else if (key == KEY_LEFT)
+				valid = move_left(game, score);
+			else if (key == KEY_RIGHT)
+				valid = move_right(game, score);
 
-		if (key == KEY_UP || key == KEY_DOWN || key == KEY_RIGHT ||
-		    key == KEY_LEFT) {
-			if (valid == 1)
-				generate_rand_cell(game);
-			draw_game(window, game);
+			if (key == KEY_UP || key == KEY_DOWN || key == KEY_RIGHT ||
+				key == KEY_LEFT) {
+				if (valid == 1)
+					generate_rand_cell(game);
+				draw_game(window, game);
+			}
 		}
 	}
     nodelay(stdscr, FALSE);
+	if (game_status != 0) {
+		clear();
+		draw_game(window, game);
+		info_panel(*score, game_status);
+	}
 }
 
 void reset_game(int *game_in_progress, int game[][5], int *score)
@@ -605,6 +751,7 @@ int main()
 		if (key == '\n') {
 			if (strcmp(options[selected], "Quit") == 0) {
 				clear();
+				reset_game(&game_in_progress, game, &score);
 				break;
 			} else if (strcmp(options[selected], "New Game") == 0) {
 				move(0, 0);
@@ -621,6 +768,7 @@ int main()
 		}
 		clear();
 	}
+	delwin(window);
 	
 	endwin();
 	return 0;
