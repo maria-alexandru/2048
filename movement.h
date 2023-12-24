@@ -2,8 +2,13 @@
 #define MOVEMENT_H
 
 #include <stdio.h>
+#include <ncurses.h>
 
-char auto_move(int game[][5]);
+void copy_info(int game[][5], int game_copy[][5]);
+
+int count_cells(int game[][5]);
+
+int auto_move(int game[][5]);
 
 int move_left(int game[][5], int *score);
 

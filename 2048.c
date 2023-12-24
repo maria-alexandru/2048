@@ -6,8 +6,42 @@
 #include "utils.h"
 #include "movement.h"
 #include "draw.h"
+#include "theme.h"
 
-void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score);
+int init()
+{
+	// check if colors are availabe
+	if (!(has_colors() && start_color() == OK)) {
+		endwin();
+		printf("No colors available. Exit");
+		return -1;
+	}
+
+	noecho(); // no output when characters are typed
+	keypad(stdscr, TRUE); // activate keyboard
+	cbreak(); // no buffering	
+	curs_set(0); // hide cursor
+	srand(time(NULL));
+
+	refresh();
+	init_pair(1, COLOR_WHITE, COLOR_WHITE);
+	init_pair(3, COLOR_BLUE, COLOR_WHITE);
+	init_pair(2, COLOR_BLUE, COLOR_BLUE);
+	bkgd(COLOR_PAIR(1));
+	return 1; // successfully initialized
+}
+
+int resize(int *max_x, int *max_y)
+{
+	int new_max_x, new_max_y;
+	getmaxyx(stdscr, new_max_y, new_max_x);
+	if (new_max_x != *max_x || new_max_y != *max_y) {
+		getmaxyx(stdscr, *max_y, *max_x);
+		refresh();
+		return 1;
+	}
+	return 0;
+}
 
 void generate_rand_cell(int game[][5]) 
 {
@@ -35,7 +69,7 @@ void generate_rand_cell(int game[][5])
 int check_winner(int game[][5])
 {
 	int i,j;
-	char move = auto_move(game);
+	int move = auto_move(game);
 
 	if (move == '\0')
 		return -1; 	// lose
@@ -51,11 +85,11 @@ int check_winner(int game[][5])
 
 void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score)
 {
+	int max_x, max_y;
+	getmaxyx(stdscr, max_y, max_x);
 	int key;
 	int valid;
-	char opt_auto_move;
-	time_t curr_time;
-	time_t start_time;
+	time_t start_time, curr_time;
 	int timeout_sec = 10;
 	int game_status;
 
@@ -68,31 +102,24 @@ void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score
 	// draw game layout
 	draw_game(window, game);
 	start_time = time(NULL);
+	nodelay(stdscr, TRUE);
 	while(1) {
+		if (resize(&max_x, &max_y) == 1)
+			draw_game(window, game);
+
 		game_status = check_winner(game);
-		if (game_status == 1) {
+		if (game_status == 1)
 			break;
-		}
-		else if (game_status == -1) {
+		else if (game_status == -1)
 			break;
-		}
+
 		curr_time = time(NULL);
-   		nodelay(stdscr, TRUE);
 		info_panel(*score, game_status);
 		valid = 0;
 		key = getch();
 		// if there was no input for timeout_sec seconds, move automatically		
-		if (difftime(curr_time, start_time) >= timeout_sec){
-			opt_auto_move = auto_move(game);
-			if (opt_auto_move == 'U')
-				key = KEY_UP;
-			else if (opt_auto_move == 'D')
-				key = KEY_DOWN;
-			else if (opt_auto_move == 'R')
-				key = KEY_RIGHT;
-			else if (opt_auto_move == 'L')
-				key = KEY_LEFT;
-		}
+		if (difftime(curr_time, start_time) >= timeout_sec)
+			key = auto_move(game);
 		if (key > 0) {
 			start_time = time(NULL);
 			if (key == 'Q')
@@ -132,27 +159,59 @@ void reset_game(int *game_in_progress, int game[][5], int *score)
 			game[i][j] = 0;
 }
 
+void open_theme_menu(WINDOW *window, theme themes[], int theme_count)
+{
+	int cursor_pos_x = 0, cursor_pos_y = 0;
+	int max_x, max_y;
+	int key, selected = 0;
+
+	// get max size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	// move the cursor to the center so that the text will be centered
+	move(cursor_pos_y, cursor_pos_x);
+	
+	while (1) {
+		resize(&max_x, &max_y);
+		draw_theme_menu(window, themes, theme_count, selected);
+		key = getch();
+		if (key == KEY_DOWN && selected < theme_count - 1)
+			selected++;
+		if (key == KEY_UP && selected > 0)
+			selected--;
+		if (key == 'Q')
+			break;
+		
+		// enter is pressed
+		if (key == '\n') {
+			set_theme(themes[selected]);
+			break;
+		}
+	}
+}
+
 int main()
 {
 	WINDOW *window = initscr();
 	int game[5][5]={0};
 	int game_in_progress = 0, score =0;
-	int option_count = 3, selected = 0;
+	int option_count = 4, selected = 0;
 	int key;
-	// menu options
-	char options[5][20] = {"New Game", "Resume", "Quit"};
+	int max_x, max_y;
+	char options[5][20] = {"New Game", "Resume", "Theme", "Quit"}; // menu options
+	theme themes[10];
+	int theme_count = 0;
 
-	// check if colors are availabe
-	if (!(has_colors() && start_color() == OK)) {
-		endwin();
-		printf("No colors available. Exit");
+	if (init() == -1)
 		return 0;
-	}
-	init();
+
+	getmaxyx(stdscr, max_y, max_x);
+	theme_count = read_themes(themes);
+	set_theme(themes[0]);
 	while(1) {
-		draw_menu(window, options, option_count, selected);//, &game_in_progress, game);
+		resize(&max_x, &max_y); // refresh if terminal window size changes
+		draw_menu(window, options, option_count, selected);
 		key = getch();
-		if (key == KEY_DOWN && selected < 2)
+		if (key == KEY_DOWN && selected < option_count - 1)
 			selected++;
 		if (key == KEY_UP && selected > 0)
 			selected--;
@@ -179,6 +238,9 @@ int main()
 					start_game(window, &game_in_progress, game, &score);
 					clear();
 				}
+			} else if (strcmp(options[selected], "Theme") == 0) {
+				open_theme_menu(window, themes, theme_count);
+				clear();
 			}
 		}
 		clear();

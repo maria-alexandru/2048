@@ -1,67 +1,64 @@
 #include "movement.h"
 
-char auto_move(int game[][5])
+void copy_info(int game[][5], int game_copy[][5])
+{
+	int i, j;
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			game_copy[i][j] = game[i][j];	
+}
+
+int count_cells(int game[][5])
+{
+	int i, j;
+	int total = 0;
+	for (i = 0; i < 4; i++)
+		for (j = 0; j < 4; j++)
+			if (game[i][j] != 0)
+				total++;
+	return total;
+}
+
+// check all moves and choose the one that frees the maximum number of cells
+int auto_move(int game[][5])
 {
 	int game_copy[5][5];
 	int i, j;
 	int score_copy = 0;
 	int total_cell_min = 16, total_cell = 0;
-	char operation = '\0';
+	int operation = '\0';
 	int valid = 0;
 
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			game_copy[i][j] = game[i][j];	
+	copy_info(game, game_copy);
 	valid = move_down(game_copy, &score_copy);
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			if (game_copy[i][j] != 0)
-				total_cell++;
+	total_cell = count_cells(game_copy);
 	if (valid == 1 && total_cell <= total_cell_min) {
 		total_cell_min = total_cell;
-		operation = 'D';
+		operation = KEY_DOWN;
 	}
 
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			game_copy[i][j] = game[i][j];
-	total_cell = 0;
+	copy_info(game, game_copy);
 	valid = move_up(game_copy, &score_copy);
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			if (game_copy[i][j] != 0)
-				total_cell++;
+	total_cell = count_cells(game_copy);
 	if (valid == 1 && total_cell <= total_cell_min) {
 		total_cell_min = total_cell;
-		operation = 'U';
+		operation = KEY_UP;
 	}
 
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			game_copy[i][j] = game[i][j];
-	total_cell = 0;
+	copy_info(game, game_copy);
 	valid = move_right(game_copy, &score_copy);
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			if (game_copy[i][j] != 0)
-				total_cell++;
+	total_cell = count_cells(game_copy);
 	if (valid == 1 && total_cell <= total_cell_min) {
 		total_cell_min = total_cell;
-		operation = 'R';
+		operation = KEY_RIGHT;
 	}
 
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			game_copy[i][j] = game[i][j];
-	total_cell = 0;
+	copy_info(game, game_copy);
 	valid = move_left(game_copy, &score_copy);
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
-			if (game_copy[i][j] != 0)
-				total_cell++;
+	total_cell = count_cells(game_copy);
 	if (valid == 1 && total_cell <= total_cell_min) {
 		total_cell_min = total_cell;
-		operation = 'L';
+		operation = KEY_LEFT;
 	}
 
 	return operation;

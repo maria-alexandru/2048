@@ -1,5 +1,6 @@
 #include "draw.h"
 #include "utils.h"
+#include "theme.h"
 
 void draw_screen_border(WINDOW *window)
 {
@@ -10,6 +11,25 @@ void draw_screen_border(WINDOW *window)
 	attroff(A_STANDOUT);
 	attroff(COLOR_PAIR(2));
 	wrefresh(window);
+}
+
+void rectangle(int x, int y, int size_x, int size_y)
+{
+	mvhline(y, x, 0, size_x);
+	mvvline(y, x, 0, size_y);
+	mvvline(y, x + size_x, 0, size_y);
+	mvhline(y + size_y, x, 0, size_x);
+    mvaddch(y, x, ACS_ULCORNER);
+    mvaddch(y + size_y, x, ACS_LLCORNER);
+    mvaddch(y, x + size_x, ACS_URCORNER);
+    mvaddch(y + size_y, x + size_x, ACS_LRCORNER);
+}
+
+void fill_rectangle(int x, int y, int size_x, int size_y)
+{
+	int i = x;
+	for (x; x < i + size_x; x++)
+		mvvline(y, x, 0, size_y);
 }
 
 void print_valid_input(int x, int y)
@@ -78,35 +98,6 @@ void info_panel(int score, int status)
 	}
 }
 
-void rectangle(int x, int y, int size_x, int size_y)
-{
-	mvhline(y, x, 0, size_x);
-	mvvline(y, x, 0, size_y);
-	mvvline(y, x + size_x, 0, size_y);
-	mvhline(y + size_y, x, 0, size_x);
-    mvaddch(y, x, ACS_ULCORNER);
-    mvaddch(y + size_y, x, ACS_LLCORNER);
-    mvaddch(y, x + size_x, ACS_URCORNER);
-    mvaddch(y + size_y, x + size_x, ACS_LRCORNER);
-}
-
-void init()
-{
-	// no output when characters are typed
-	noecho();
-	// activate keyboard
-	keypad(stdscr, TRUE);
-	// no buffering
-	cbreak();
-	// hide cursor	
-	curs_set(0);
-	srand(time(NULL));
-
-	refresh();
-	init_pair(1, COLOR_WHITE, COLOR_WHITE);
-	bkgd(COLOR_PAIR(1));
-}
-
 void draw_game(WINDOW *window, int game[][5])
 {
 	clear();
@@ -122,22 +113,6 @@ void draw_game(WINDOW *window, int game[][5])
 	cursor_pos_y = (max_y -  layout_size) / 2 ;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2;
 	move(cursor_pos_y, cursor_pos_x);
-
-	// create colors
-	init_color(20, 871, 507, 421); // red
-	init_color(21, 968, 996, 820); // yellow
-	init_color(22, 996, 796, 796); // pink
-	init_color(23, 441, 185, 687); // purple
-	init_color(24, 554, 652, 910); // dark blue
-	init_color(25, 539, 851, 695); // blue
-	init_color(26, 812, 945, 820); // green
-	init_color(27, 859, 746, 996); // light purple
-	init_color(28, 0, 503, 437);   // dark green
-	init_color(29, 976, 375, 554); // pink
-	init_color(30, 996, 593, 0);   //orange
-	init_pair(3, COLOR_BLUE, COLOR_WHITE);
-	for (i = 20; i <= 30; i++)
-		init_pair(i, COLOR_BLUE, i);
 
 	for (i = 0; i < 4; i++) {
 		for (j = 0; j < 4; j++) {
@@ -173,9 +148,6 @@ void draw_menu(WINDOW *window, char options[][20], int option_count, int selecte
 	int max_x, max_y;
 	int i;
 
-	init_pair(3, COLOR_BLUE, COLOR_WHITE);
-	init_pair(2, COLOR_BLUE, COLOR_BLUE);
-
 	// get max size of the window
 	getmaxyx(stdscr, max_y, max_x);
 	// move the cursor to the center so that the text will be centered
@@ -200,3 +172,48 @@ void draw_menu(WINDOW *window, char options[][20], int option_count, int selecte
 	wrefresh(window);
 }
 
+void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int selected)
+{
+	clear();
+	int max_x, max_y, x = 10, y = 10, start_x = 3, start_y = 3;
+	int i, k;
+	int cell_size = 4;
+	int key;
+	int new_max_x, new_max_y;
+	int count = 0;
+
+	// get max size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	x = start_x;
+	y = start_y;
+	for (k = 0; k < theme_count; k++) {
+		// if theme is selected, highlight it
+		if (selected == k)
+			attron(COLOR_PAIR(11)); // highlight color
+		else
+			attron(COLOR_PAIR(12)); // not highlight color
+		rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
+		fill_rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
+		attroff(A_STANDOUT);
+		attron(COLOR_PAIR(3));
+		mvaddstr(y, x, themes[k].name);
+		y++;
+		draw_screen_border(window);
+		count = 0;
+		// print cell with its value and color
+		for (i = 2; i <= 2048; i = i * 2) {
+			attron(COLOR_PAIR(themes[k].color[count].id));
+			rectangle(x + 1, y + 1, 2 * cell_size - 2, cell_size - 2);
+			char val[10] = "";
+			attron(A_BOLD);
+			int_to_string(val, i, cell_size + 1);
+			mvaddstr(y + 2, x + 2, val);
+			x += 2 * cell_size ;
+			attroff(A_BOLD);
+			count++;
+		}
+		y += cell_size + 3;
+		x = start_x;
+	}	
+	refresh();				
+}
