@@ -9,6 +9,10 @@
 #include "theme.h"
 #include "storage.h"
 
+
+void start_game(WINDOW *window, game_stats *game_stats);
+void reset_game(game_stats *game_stats);
+
 int init()
 {
 	// check if colors are availabe
@@ -30,18 +34,6 @@ int init()
 	init_pair(2, COLOR_BLUE, COLOR_BLUE);
 	bkgd(COLOR_PAIR(1));
 	return 1; // successfully initialized
-}
-
-int resize(int *max_x, int *max_y)
-{
-	int new_max_x, new_max_y;
-	getmaxyx(stdscr, new_max_y, new_max_x);
-	if (new_max_x != *max_x || new_max_y != *max_y) {
-		getmaxyx(stdscr, *max_y, *max_x);
-		refresh();
-		return 1;
-	}
-	return 0;
 }
 
 void generate_rand_cell(int game[][5]) 
@@ -77,7 +69,7 @@ int check_winner(int game[][5])
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
-			if (game[i][j] == 2048)
+			if (game[i][j] == 16)
 				return 1; // win
 
 	// continue game
@@ -92,42 +84,59 @@ int update_high_score(game_stats *game_stats)
 		game_stats->high_score_time = game_stats->playing_time;
 		return 1;
 	} else if (game_stats->high_score == game_stats->score) {
-		if (game_stats->playing_time < game_stats->high_score_time)
+		if (game_stats->playing_time < game_stats->high_score_time){
 			game_stats->high_score_time = game_stats->playing_time;
-		return 1;
+			return 1;
+		}
 	}
 	return 0;
 }
 
-void end_game(WINDOW *window, game_stats *game_stats, int game_status)
+void end_game(WINDOW *window, game_stats *game_stats)
 {
 	int key;
 	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x);
 	int new_high_score = 0;
 
-	save_game(*game_stats);
-	if (game_status != 0) {
+	if (game_stats->game_status != 0) {
 		clear();
 		draw_game(window, game_stats->game);
+		draw_end_game(game_stats->game_status);
 		new_high_score = update_high_score(game_stats);
-		draw_end_game(game_status, new_high_score);
+		if (new_high_score == 1) {
+			introduce_name(window, game_stats);//draw_hs_message(game_stats);
+			clear();
+			draw_game(window, game_stats->game);
+			draw_end_game(game_stats->game_status);
+			new_high_score = 0;
+			save_game(*game_stats);
+		}
 		// wait until Q is pressed to exit
 		while (1) {
-			if (resize(&max_x, &max_y) == 1) {
+			if (resize(&max_x, &max_y) == 1) { // terminal window was resized
 				draw_game(window, game_stats->game);
-				draw_end_game(game_status, new_high_score);
+				draw_end_game(game_stats->game_status);
 			}
-			info_panel(*game_stats, game_status);
+			info_panel(*game_stats, game_stats->game_status);
 			key = getch();
 			if (key == 'Q')
 				break;
+			else if (key == 'N')
+				break;
 		}
+	}
+	save_game(*game_stats);
+	if (key == 'N') {
+		move(0, 0);
+		reset_game(game_stats);
+		start_game(window, game_stats);
 	}
 }
 
 void execute_commmand(int key, game_stats *game_stats, WINDOW *window)
 {
+	// copy the game matrix and the score
 	if(key != 'U') {
 		copy_info(game_stats->game, game_stats->old_game);
 		game_stats->old_score = game_stats->score;
@@ -142,6 +151,7 @@ void execute_commmand(int key, game_stats *game_stats, WINDOW *window)
 	else if (key == KEY_RIGHT)
 		valid = move_right(game_stats->game, &game_stats->score);
 	else if (key == 'U'){
+		// undo the last move
 		copy_info(game_stats->old_game, game_stats->game);
 		game_stats->score = game_stats->old_score;
 		draw_game(window, game_stats->game);
@@ -162,9 +172,9 @@ void start_game(WINDOW *window, game_stats *game_stats)
 	int key;
 	time_t start_time, curr_time;
 	int timeout_sec = 10;
-	int game_status;
 	int playing_time_aux = game_stats->playing_time;
 
+	// a new game was started
 	if (game_stats->game_in_progress == 0) {
 		game_stats->game_in_progress = 1;
 		generate_rand_cell(game_stats->game);
@@ -181,19 +191,19 @@ void start_game(WINDOW *window, game_stats *game_stats)
 		if (resize(&max_x, &max_y) == 1) // terminal window was resized
 			draw_game(window, game_stats->game);
 
-		game_status = check_winner(game_stats->game);
-		if (game_status == 1 || game_status == -1)
+		game_stats->game_status = check_winner(game_stats->game);
+		if (game_stats->game_status == 1 || game_stats->game_status == -1)
 			break;
 
 		curr_time = time(NULL);
 		game_stats->playing_time = playing_time_aux + (int)difftime(curr_time, start_time);
-		info_panel(*game_stats, game_status);
+		info_panel(*game_stats, game_stats->game_status);
 		key = getch();
 
 		// if there was no input for timeout_sec seconds, move automatically		
 		if (difftime(curr_time, start_time) >= timeout_sec) {
 			key = auto_move(game_stats->game);
-			save_game(*game_stats);
+			save_game(*game_stats); // save the game
 		}
 		if (key > 0) {
 			playing_time_aux = game_stats->playing_time;
@@ -204,8 +214,9 @@ void start_game(WINDOW *window, game_stats *game_stats)
 				execute_commmand(key, game_stats, window);
 		}
 	}
-	end_game(window, game_stats, game_status);
     nodelay(stdscr, FALSE);
+	if (game_stats->game_status != 0)
+		end_game(window, game_stats);
 }
 
 void reset_game(game_stats *game_stats)
@@ -223,7 +234,7 @@ void open_theme_menu(WINDOW *window, theme themes[], int theme_count, int *theme
 {
 	int cursor_pos_x = 0, cursor_pos_y = 0;
 	int max_x, max_y;
-	int key, selected = 0;
+	int key, selected = *theme_id;
 
 	// get max size of the window
 	getmaxyx(stdscr, max_y, max_x);
@@ -250,7 +261,8 @@ void open_theme_menu(WINDOW *window, theme themes[], int theme_count, int *theme
 	}
 }
 
-void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, theme themes[], int theme_count)
+void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, 
+					theme themes[], int theme_count)
 {
 	int key;
 	int max_x, max_y;
@@ -259,12 +271,20 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, them
 
 	while(1) {
 		resize(&max_x, &max_y); // refresh if terminal window size changes
-		draw_menu(window, main_menu, selected);// main_menu.options, main_menu.option_count, selected);
+		draw_menu(window, main_menu, selected);
 		key = getch();
 		if (key == KEY_DOWN && selected < main_menu.option_count - 1)
 			selected++;
 		if (key == KEY_UP && selected > 0)
 			selected--;
+		if (strcmp(main_menu.options[selected], "Resume") == 0) {
+			if (game_stats->game_in_progress == 0) {
+				if (key == KEY_DOWN)
+					selected++;
+				else if (key == KEY_UP)
+					selected--;
+			}
+		}
 		// enter is pressed
 		if (key == '\n') {
 			if (strcmp(main_menu.options[selected], "Quit") == 0) {
@@ -276,12 +296,15 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, them
 				start_game(window, game_stats);
 				clear();
 			} else if (strcmp(main_menu.options[selected], "Resume") == 0) {
-					move(0, 0);
-					game_stats->game_in_progress = 1;
-					start_game(window, game_stats);
-					clear();
+					if (game_stats->game_in_progress == 1) {
+						move(0, 0);
+						game_stats->game_in_progress = 1;
+						start_game(window, game_stats);
+						clear();
+					}
 			} else if (strcmp(main_menu.options[selected], "Theme") == 0) {
 				open_theme_menu(window, themes, theme_count, &game_stats->theme_id);
+				save_game(*game_stats);
 				clear();
 			}
 		}
@@ -292,20 +315,19 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, them
 int main()
 {
 	WINDOW *window = initscr();
+	if (init() == -1)
+		return 0;
+
 	game_stats game_stats;
 	menu main_menu;
 	theme themes[10];
-
 	int theme_count = 0;
-	game_stats.game_in_progress = 0;
+
 	main_menu.option_count = 4;
 	strcpy(main_menu.options[0], "New Game");
 	strcpy(main_menu.options[1], "Resume");
 	strcpy(main_menu.options[2], "Theme");
 	strcpy(main_menu.options[3], "Quit");
-
-	if (init() == -1)
-		return 0;
 
 	upload_game(&game_stats);
 	copy_info(game_stats.game, game_stats.old_game);

@@ -17,15 +17,18 @@ typedef struct{
 	int high_score;
 	int high_score_time;
     int theme_id;
-	char player[50];
+	char player[20];
 	int old_game[5][5];
 	int old_score;
+	int game_status;
 }game_stats;
 
 typedef struct{
     int option_count;
     char options[MAX_OPTIONS][MAX_OPTION_LENGHT];
 }menu;
+
+int resize(int *max_x, int *max_y);
 
 char* timestr(struct tm t, char* time); // create a string with current time
 

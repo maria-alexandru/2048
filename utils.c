@@ -1,5 +1,18 @@
 #include "utils.h"
 
+// refresh the screen if terminal window size changes
+int resize(int *max_x, int *max_y)
+{
+	int new_max_x, new_max_y;
+	getmaxyx(stdscr, new_max_y, new_max_x);
+	if (new_max_x != *max_x || new_max_y != *max_y) {
+		getmaxyx(stdscr, *max_y, *max_x);
+		refresh();
+		return 1;
+	}
+	return 0;
+}
+
 // create a string with current time
 char* timestr(struct tm t, char* time)
 {

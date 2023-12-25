@@ -70,10 +70,10 @@ void print_high_score(game_stats game_stats, int x, int y)
 	int_to_string(HS, game_stats.high_score, 0);
 	mvaddstr(y, x, "High score: ");
 	mvaddstr(y, x + strlen("High score: "), HS);
-	//mvaddstr(y + 1, x, "Player: ");
-	//mvaddstr(y + 1, x + strlen("Player: "), game_stats.player);
 	mvaddstr(y + 1, x, "High score time: ");
 	mvaddstr(y + 2, x, HS_time + 3);
+	mvaddstr(y + 3, x, "Player: ");
+	mvaddstr(y + 4, x, game_stats.player);
 }
 
 void print_score_time(game_stats game_stats, int x, int y)
@@ -104,17 +104,20 @@ void info_panel(game_stats game_stats, int status)
 	print_score_time(game_stats, x, y); // print score and playing time
 	y += 3;
 	print_high_score(game_stats, x, y); // print high score info
-	y += 5;
+	y += 6;//5
 
 	if (status == 0)
 		print_valid_input(x, y); // if game is not over, print valid commands
 	else if (status == -1)
 		mvaddstr(y, x, "Game over!");
 	else if (status == 1)
-		mvaddstr(y, x, "Win!");
+		mvaddstr(y, x, "You won!");
 	if (status == 1 || status == -1) {
 		y++;
 		mvaddstr(y, x, "Press Q to exit");
+		y++;
+		mvaddstr(y, x, "Press N to start");
+		mvaddstr(y + 1, x, "a new game");
 	}
 }
 
@@ -242,19 +245,114 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 	refresh();				
 }
 
-void draw_end_game(int game_status, int new_high_score)
+void introduce_name(WINDOW *window, game_stats *game_stats)
+{
+	char name[20] = "";
+	int c, i = 0;
+	int max_x, max_y;
+	//get size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	draw_hs_message(game_stats, name);
+
+	while(c != '\n') {
+		if (resize(&max_x, &max_y) == 1) {
+			draw_game(window, game_stats->game);
+			draw_end_game(game_stats->game_status);
+			draw_hs_message(game_stats, name);
+		}
+		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
+			if (c == KEY_BACKSPACE) {
+				if (i >= 1) {
+					name[i - 1] = '\0';
+					i--;
+				}
+			}
+			else if (i < 18) { // maximum 17 characters
+				name[i++] = c;
+				name[i] = '\0';
+			}
+			draw_hs_message(game_stats, name);
+		}
+		c = getch();
+	}
+	strcpy(game_stats->player, name);
+}
+
+void draw_hs_message(game_stats *game_stats, char name[])
+{
+	int max_x, max_y;
+	int cursor_pos_x, cursor_pos_y, start_x;
+	int cell_size = 4;
+	int layout_size = 4 * cell_size;
+	int i;
+	int length;
+	char message[40] = "   New high score!    ";
+	length = strlen(message);
+
+	//get size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	cursor_pos_y = (max_y -  layout_size) / 2 - 4;
+	if(cursor_pos_y < 1)
+		cursor_pos_y = 1;
+	cursor_pos_y =  (max_y -  layout_size) + 4;
+	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
+	move(cursor_pos_y, cursor_pos_x);
+	attron(COLOR_PAIR(19));
+	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
+	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
+	mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
+	strcpy(message, " Save the high score! ");
+	mvaddstr(cursor_pos_y + 2, cursor_pos_x + 1, message);
+	strcpy(message, "    Type your name:   ");
+	mvaddstr(cursor_pos_y + 3, cursor_pos_x + 1, message);
+	strcpy(message, "                      ");
+	mvaddstr(cursor_pos_y + 4, cursor_pos_x + 1, message);
+
+	start_x = cursor_pos_x;
+	cursor_pos_y += 4;
+	cursor_pos_x += length / 2;
+
+	cursor_pos_x = start_x + length / 2 - (strlen(name) - 1) / 2;
+	mvaddstr(cursor_pos_y, start_x + 1, message);
+	mvaddstr(cursor_pos_y, cursor_pos_x, name);
+	/*
+	int c;
+	c = getch();
+	i = 0;
+	// read player's name
+	while(c != '\n') {
+		resize(&max_x, &max_y);
+		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
+			if (c == KEY_BACKSPACE) {
+				printf("ddd");
+				name[i - 1] = '\0';
+				i--;
+			}
+			else if (i < 18) { // maximum 17 characters
+				name[i++] = c;
+				name[i] = '\0';
+			}
+			cursor_pos_x = start_x + length/2 - (i-1)/2;
+			mvaddstr(cursor_pos_y, start_x + 1, message);
+			mvaddstr(cursor_pos_y, cursor_pos_x, name);
+		}
+		c = getch();
+	}
+	strcpy(game_stats->player, name);*/
+}
+
+void draw_end_game(int game_status)
 {
 	int max_x, max_y;
 	int cursor_pos_x, cursor_pos_y;
 	int cell_size = 4;
 	int layout_size = 4 * cell_size;
-	int i, j;
 	int length;
-	char message[20];
+	char message[40];
 	if(game_status == -1)
 		strcpy(message, " Game over! ");
 	else 
-		strcpy(message, " Win! ");
+		strcpy(message, " You won! ");
 	length = strlen(message);
 
 	//get size of the window
@@ -266,27 +364,7 @@ void draw_end_game(int game_status, int new_high_score)
 	move(cursor_pos_y, cursor_pos_x);
 	attron(COLOR_PAIR(19));
 
-
-	if (new_high_score == 1) {
-		length = strlen(" New high score! ");
-		cursor_pos_y -= 2;
-		if (cursor_pos_y < 1)
-			cursor_pos_y = 1;
-		cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
-
-		if (strcmp(message, " Win! ") == 0)
-			strcpy(message, "       Win!      ");
-		else
-			strcpy(message, "   Game over!    ");
-
-		fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 3);
-		rectangle(cursor_pos_x, cursor_pos_y, length + 1, 3);
-		mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
-		strcpy(message, " New high score! ");
-		mvaddstr(cursor_pos_y + 2, cursor_pos_x + 1, message);
-	} else {
-		fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
-		rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
-		mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
-	}
+	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
+	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
+	mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
 }
