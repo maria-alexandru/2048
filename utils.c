@@ -92,3 +92,12 @@ int val_color_id(int val)
 	}
 	return i;
 }
+
+char *timestr_sec(int sec, char *time)
+{
+	struct tm t;
+	t.tm_hour = sec / 3600;
+	t.tm_min = (sec - t.tm_hour * 3600) / 60;
+	t.tm_sec = sec - t.tm_min * 60 - t.tm_hour * 3600;
+	timestr(t, time);
+}

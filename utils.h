@@ -15,4 +15,6 @@ void int_to_string(char *s, int val, int format);
 
 int val_color_id(int val); // convert cell value to its color id
 
+char *timestr_sec(int sec, char *time);
+
 #endif

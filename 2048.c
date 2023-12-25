@@ -83,7 +83,8 @@ int check_winner(int game[][5])
 	return 0;
 }
 
-void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score)
+void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score,
+				int *playing_time)
 {
 	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x);
@@ -92,6 +93,7 @@ void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score
 	time_t start_time, curr_time;
 	int timeout_sec = 10;
 	int game_status;
+	int playing_time_aux = *playing_time;
 
 	if (*game_in_progress == 0) {
 		*game_in_progress = 1;
@@ -114,13 +116,15 @@ void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score
 			break;
 
 		curr_time = time(NULL);
-		info_panel(*score, game_status);
+		*playing_time = playing_time_aux + (int)difftime(curr_time, start_time);
+		info_panel(*score, game_status, *playing_time);
 		valid = 0;
 		key = getch();
 		// if there was no input for timeout_sec seconds, move automatically		
 		if (difftime(curr_time, start_time) >= timeout_sec)
 			key = auto_move(game);
 		if (key > 0) {
+			playing_time_aux = *playing_time;
 			start_time = time(NULL);
 			if (key == 'Q')
 				break;
@@ -141,18 +145,25 @@ void start_game(WINDOW *window, int *game_in_progress, int game[][5], int *score
 			}
 		}
 	}
-    nodelay(stdscr, FALSE);
 	if (game_status != 0) {
 		clear();
 		draw_game(window, game);
-		info_panel(*score, game_status);
+		// wait until Q is pressed to exit
+		while (1) {
+			info_panel(*score, game_status, *playing_time);
+			key = getch();
+			if (key == 'Q')
+				break;
+		}
 	}
+    nodelay(stdscr, FALSE);
 }
 
-void reset_game(int *game_in_progress, int game[][5], int *score)
+void reset_game(int *game_in_progress, int game[][5], int *score, int *playing_time)
 {
 	int i, j;
 	*game_in_progress = 0;
+	*playing_time = 0;
 	*score = 0;
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
@@ -192,8 +203,8 @@ void open_theme_menu(WINDOW *window, theme themes[], int theme_count)
 int main()
 {
 	WINDOW *window = initscr();
-	int game[5][5]={0};
-	int game_in_progress = 0, score =0;
+	int game[5][5] = {0};
+	int game_in_progress = 0, score = 0, playing_time = 0;
 	int option_count = 4, selected = 0;
 	int key;
 	int max_x, max_y;
@@ -225,17 +236,17 @@ int main()
 		if (key == '\n') {
 			if (strcmp(options[selected], "Quit") == 0) {
 				clear();
-				reset_game(&game_in_progress, game, &score);
+				//reset_game(&game_in_progress, game, &score);
 				break;
 			} else if (strcmp(options[selected], "New Game") == 0) {
 				move(0, 0);
-				reset_game(&game_in_progress, game, &score);
-				start_game(window, &game_in_progress, game, &score);
+				reset_game(&game_in_progress, game, &score, &playing_time);
+				start_game(window, &game_in_progress, game, &score, &playing_time);
 				clear();
 			} else if (strcmp(options[selected], "Resume") == 0) {
 				if (game_in_progress == 1) {
 					move(0, 0);
-					start_game(window, &game_in_progress, game, &score);
+					start_game(window, &game_in_progress, game, &score, &playing_time);
 					clear();
 				}
 			} else if (strcmp(options[selected], "Theme") == 0) {

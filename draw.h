@@ -16,7 +16,7 @@ void fill_rectangle(int x, int y, int size_x, int size_y);
 
 void print_valid_input(int x, int y);
 
-void info_panel(int score, int status);
+void info_panel(int score, int status, int playing_time_sec);
 
 void draw_menu(WINDOW *window, char options[][20], int option_count, int selected);
 

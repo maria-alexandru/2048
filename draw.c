@@ -51,9 +51,9 @@ void print_valid_input(int x, int y)
 	mvaddstr(y, x, "Q - quit");
 }
 
-void info_panel(int score, int status)
+void info_panel(int score, int status, int playing_time_sec)
 {
-	char date[100], time_now[100], score_text[100];
+	char date[100], time_now[100], score_text[100], time_playing[100];
 	struct tm *time_p;
 	int x, y, size_x, size_y;
 	int key;
@@ -63,6 +63,8 @@ void info_panel(int score, int status)
 	size_y -= 4;
 	x = 2;
 	y = 2;
+
+	timestr_sec(playing_time_sec, time_playing);
 
 	// get time
 	time_t t = time(NULL);
@@ -76,9 +78,12 @@ void info_panel(int score, int status)
 	rectangle(1, 1, size_x, size_y);
 	mvaddstr(y, x, date);
 	mvaddstr(y + 1, x, time_now);
-	mvaddstr(y + 3, x, "Score: ");
-	mvaddstr(y + 3, x + strlen("Score: "), score_text);
-	y += 5;
+	mvaddstr(y + 2, x, "Playing: ");
+	// print only minutes and seconds of playing time
+	mvaddstr(y + 2, x + strlen("Playing: "), time_playing + 3);
+	mvaddstr(y + 4, x, "Score: ");
+	mvaddstr(y + 4, x + strlen("Score: "), score_text);
+	y += 6;
 
 	if (status == 0)
 		print_valid_input(x, y); // if game is not over, print valid commands
@@ -88,13 +93,7 @@ void info_panel(int score, int status)
 		mvaddstr(y, x, "Win!");
 	if (status == 1 || status == -1) {
 		y++;
-		// if game is over, wait until Q is pressed
-		while (1) {
-			mvaddstr(y, x, "Press Q to exit");
-			key = getch();
-			if (key == 'Q')
-				break;
-		}
+		mvaddstr(y, x, "Press Q to exit");
 	}
 }
 
