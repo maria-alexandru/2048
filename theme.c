@@ -42,11 +42,15 @@ void initialize_colors(theme theme)
 	init_color(11, 520, 600, 960);   // dark blue // selected
 	init_pair(11, 11, 11); // selected
 	init_pair(12, 12, 12); // not selected
+	init_pair(10, COLOR_BLUE, 12); // selected text
+	init_pair(9, COLOR_BLUE, 11); // not selected text
 }
 
 void set_theme(theme theme)
 {
 	int i;
+	init_color(19, theme.color[0].r, theme.color[0].g, theme.color[0].b);
+	init_pair(19, COLOR_BLUE, 19);
 	for (i = 0; i < 11; i++) {
 		init_color(20 + i, theme.color[i].r, theme.color[i].g, theme.color[i].b);
 		init_pair(20 + i, COLOR_BLUE, theme.color[i].id);
