@@ -46,6 +46,8 @@ void print_valid_input(int x, int y)
 	mvaddstr(y, x + 1, " - move right");
 	y++;
 	mvaddstr(y, x, "Q - quit");
+	y++;
+	mvaddstr(y, x, "U - undo");
 }
 
 void print_time_date(int x, int y)

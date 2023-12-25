@@ -18,6 +18,8 @@ typedef struct{
 	int high_score_time;
     int theme_id;
 	char player[50];
+	int old_game[5][5];
+	int old_score;
 }game_stats;
 
 typedef struct{
