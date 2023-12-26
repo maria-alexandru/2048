@@ -27,12 +27,10 @@ int init()
 	cbreak(); // no buffering	
 	curs_set(0); // hide cursor
 	srand(time(NULL));
-
-	refresh();
+	
 	init_pair(1, COLOR_WHITE, COLOR_WHITE);
-	init_pair(3, COLOR_BLUE, COLOR_WHITE);
-	init_pair(2, COLOR_BLUE, COLOR_BLUE);
 	bkgd(COLOR_PAIR(1));
+	refresh();
 	return 1; // successfully initialized
 }
 
@@ -65,11 +63,11 @@ int check_winner(int game[][5])
 	int move = auto_move(game);
 
 	if (move == '\0')
-		return -1; 	// lose
+		return -1; 	// loss
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
-			if (game[i][j] == 16)
+			if (game[i][j] == 2048)
 				return 1; // win
 
 	// continue game
@@ -98,7 +96,6 @@ void end_game(WINDOW *window, game_stats *game_stats)
 	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x);
 	int new_high_score = 0;
-
 	if (game_stats->game_status != 0) {
 		clear();
 		draw_game(window, game_stats->game);

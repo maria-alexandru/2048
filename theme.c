@@ -49,8 +49,10 @@ void initialize_colors(theme theme)
 void set_theme(theme theme)
 {
 	int i;
-	init_color(19, theme.color[0].r, theme.color[0].g, theme.color[0].b);
-	init_pair(19, COLOR_BLUE, 19);
+	init_color(19, theme.color[8].r, theme.color[8].g, theme.color[8].b);
+	init_pair(18, 19, COLOR_WHITE); // line color
+	init_pair(2, 19, 19); // border color
+	init_pair(19, COLOR_BLUE, 19); // text color
 	for (i = 0; i < 11; i++) {
 		init_color(20 + i, theme.color[i].r, theme.color[i].g, theme.color[i].b);
 		init_pair(20 + i, COLOR_BLUE, theme.color[i].id);

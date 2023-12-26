@@ -114,3 +114,21 @@ char *timestr_sec(int sec, char *time)
 	t.tm_sec = sec - t.tm_min * 60 - t.tm_hour * 3600;
 	timestr(t, time);
 }
+
+void center_text(char s[], int length)
+{
+	int i, s_len;
+	char copy[50];
+	s_len = strlen(s);
+	for (i = (length - s_len) / 2; i < (length - s_len) / 2 + s_len; i++)
+		copy[i] = s[i - (length - s_len) / 2];
+	
+	for (i = 0; i < (length - s_len) / 2; i++)
+		copy[i] = ' ';
+
+	for (i =  (length - s_len) / 2 + s_len; i < length; i++)
+		copy[i] = ' ';
+	
+	copy[length] = '\0';
+	strcpy(s, copy);	
+}

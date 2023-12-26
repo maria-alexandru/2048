@@ -11,16 +11,16 @@
 
 typedef struct{
 	int game[5][5];
-    int game_in_progress;
+    int game_in_progress; // 0 or 1
 	int score;
-	int playing_time;
+	int playing_time; // in seconds
 	int high_score;
-	int high_score_time;
+	int high_score_time; // in seconds
     int theme_id;
 	char player[20];
 	int old_game[5][5];
 	int old_score;
-	int game_status;
+	int game_status; // 0 for game in progress, 1 for win, -1 for loss
 }game_stats;
 
 typedef struct{
@@ -39,5 +39,7 @@ void int_to_string(char *s, int val, int format);
 int val_color_id(int val); // convert cell value to its color id
 
 char *timestr_sec(int sec, char *time);
+
+void center_text(char s[], int length);
 
 #endif

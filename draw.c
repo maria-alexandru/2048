@@ -1,4 +1,6 @@
 #include "draw.h"
+#define LINE_COLOR 18
+#define TEXT_COLOR 19
 
 void draw_screen_border(WINDOW *window)
 {
@@ -25,8 +27,9 @@ void rectangle(int x, int y, int size_x, int size_y)
 void fill_rectangle(int x, int y, int size_x, int size_y)
 {
 	int i = x;
-	for (x; x < i + size_x; x++)
+	for (x; x < i + size_x; x++) {
 		mvvline(y, x, 0, size_y);
+	}
 }
 
 void print_valid_input(int x, int y)
@@ -94,10 +97,12 @@ void info_panel(game_stats game_stats, int status)
 	int x, y, size_x, size_y;
 	getmaxyx(stdscr, size_y, size_x);
 	size_x = 20; size_y -= 4;
-	x = 2; y = 2;
+	x = 3; y = 3;
 	
-	attron(COLOR_PAIR(3));
-	rectangle(1, 1, size_x, size_y);
+	attron(COLOR_PAIR(2));
+	fill_rectangle(2, 2, size_x , size_y - 1);
+	rectangle(2, 2, size_x, size_y - 1);
+	attron(COLOR_PAIR(TEXT_COLOR));
 
 	print_time_date(x, y); // print current date and time
 	y += 3;
@@ -142,7 +147,7 @@ void draw_game(WINDOW *window, int game[][5])
 			x = cursor_pos_x + j * cell_size * 2;
 			y = cursor_pos_y + i * cell_size;
 			//draw cell
-			attron(COLOR_PAIR(3));
+			attron(COLOR_PAIR(LINE_COLOR));
 			rectangle(x, y, 2 * cell_size, cell_size);
 			//print cell value`
 			if (game[i][j] != 0) {
@@ -160,7 +165,7 @@ void draw_game(WINDOW *window, int game[][5])
 	}
 
 	//draw game border
-	attron(COLOR_PAIR(3));
+	attron(COLOR_PAIR(LINE_COLOR));
 	rectangle(cursor_pos_x, cursor_pos_y, 2 * layout_size, layout_size);
 	draw_screen_border(window);
 }
@@ -178,18 +183,26 @@ void draw_menu(WINDOW *window, menu main_menu, int selected)
 
 	draw_screen_border(window);
 	wrefresh(window);
-	attron(COLOR_PAIR(3));
-	cursor_pos_y = (max_y -  2 * main_menu.option_count) / 2 ;
-	cursor_pos_x = (max_x - 9) / 2;
+	cursor_pos_y = (max_y -  3 * main_menu.option_count) / 2 - 2;
+	cursor_pos_x = (max_x - 15) / 2;
 	for (i = 0; i < main_menu.option_count; i++) {
 		// highlight option if it is selected
 		if (selected == i)
 			attron(A_STANDOUT);
 		else
 			attroff(A_STANDOUT);
+		
+		attron(COLOR_PAIR(TEXT_COLOR));
+		fill_rectangle(cursor_pos_x, cursor_pos_y, 15, 2);
+		rectangle(cursor_pos_x, cursor_pos_y, 15, 2);
+
 		// display options
-		mvaddstr(cursor_pos_y, cursor_pos_x, main_menu.options[i]);
-		cursor_pos_y += 2;
+		char string[30];
+		strcpy(string, main_menu.options[i]);
+		center_text(string, 14);
+		mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, string);// main_menu.options[i]);
+		cursor_pos_y += 4;
+		//cursor_pos_y += 2;
 		move(cursor_pos_y, cursor_pos_x);
 	}	
 	wrefresh(window);
@@ -218,7 +231,6 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 		rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
 		fill_rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
 		attroff(A_STANDOUT);
-		attron(COLOR_PAIR(3));
 		if (selected == k)
 			attron(COLOR_PAIR(9)); // highlight color
 		else
@@ -297,7 +309,7 @@ void draw_hs_message(game_stats *game_stats, char name[])
 	cursor_pos_y =  (max_y -  layout_size) + 4;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
 	move(cursor_pos_y, cursor_pos_x);
-	attron(COLOR_PAIR(19));
+	attron(COLOR_PAIR(TEXT_COLOR));
 	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
 	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
 	mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
@@ -315,30 +327,6 @@ void draw_hs_message(game_stats *game_stats, char name[])
 	cursor_pos_x = start_x + length / 2 - (strlen(name) - 1) / 2;
 	mvaddstr(cursor_pos_y, start_x + 1, message);
 	mvaddstr(cursor_pos_y, cursor_pos_x, name);
-	/*
-	int c;
-	c = getch();
-	i = 0;
-	// read player's name
-	while(c != '\n') {
-		resize(&max_x, &max_y);
-		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
-			if (c == KEY_BACKSPACE) {
-				printf("ddd");
-				name[i - 1] = '\0';
-				i--;
-			}
-			else if (i < 18) { // maximum 17 characters
-				name[i++] = c;
-				name[i] = '\0';
-			}
-			cursor_pos_x = start_x + length/2 - (i-1)/2;
-			mvaddstr(cursor_pos_y, start_x + 1, message);
-			mvaddstr(cursor_pos_y, cursor_pos_x, name);
-		}
-		c = getch();
-	}
-	strcpy(game_stats->player, name);*/
 }
 
 void draw_end_game(int game_status)
@@ -362,7 +350,7 @@ void draw_end_game(int game_status)
 		cursor_pos_y = 1;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
 	move(cursor_pos_y, cursor_pos_x);
-	attron(COLOR_PAIR(19));
+	attron(COLOR_PAIR(TEXT_COLOR));
 
 	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
 	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
