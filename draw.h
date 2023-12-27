@@ -31,10 +31,10 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 
 void draw_game(WINDOW *window, int game[][5]);
 
-void introduce_name(WINDOW *window, game_stats *game_stats);
-
 void draw_hs_message(game_stats *game_stats, char name[]);
 
-void draw_end_game(int game_status);//, int new_high_score);
+void draw_end_game(int game_status);
+
+void draw_top_scores(WINDOW *window, top_score top_scores[]);
 
 #endif

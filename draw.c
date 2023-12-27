@@ -1,12 +1,13 @@
 #include "draw.h"
 #define LINE_COLOR 18
 #define TEXT_COLOR 19
+#define R_EDGE 25
 
 void draw_screen_border(WINDOW *window)
 {
 	attron(COLOR_PAIR(2));
 	attron(A_STANDOUT);
-	box(window, 0, 0); // menu border
+	box(window, 0, 0); // border
 	attroff(A_STANDOUT);
 	attroff(COLOR_PAIR(2));
 	wrefresh(window);
@@ -96,13 +97,15 @@ void info_panel(game_stats game_stats, int status)
 {
 	int x, y, size_x, size_y;
 	getmaxyx(stdscr, size_y, size_x);
-	size_x = 20; size_y -= 4;
-	x = 3; y = 3;
+	size_x = 21; size_y -= 4;
+	if (size_y < R_EDGE)
+		size_y = R_EDGE;
+	x = 4; y = 3;
 	
 	attron(COLOR_PAIR(2));
 	fill_rectangle(2, 2, size_x , size_y - 1);
-	rectangle(2, 2, size_x, size_y - 1);
 	attron(COLOR_PAIR(TEXT_COLOR));
+	rectangle(2, 2, size_x, size_y - 1);
 
 	print_time_date(x, y); // print current date and time
 	y += 3;
@@ -140,6 +143,8 @@ void draw_game(WINDOW *window, int game[][5])
 	getmaxyx(stdscr, max_y, max_x);
 	cursor_pos_y = (max_y -  layout_size) / 2 ;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2;
+	if (cursor_pos_x < R_EDGE)
+		cursor_pos_x = R_EDGE;
 	move(cursor_pos_y, cursor_pos_x);
 
 	for (i = 0; i < 4; i++) {
@@ -149,7 +154,7 @@ void draw_game(WINDOW *window, int game[][5])
 			//draw cell
 			attron(COLOR_PAIR(LINE_COLOR));
 			rectangle(x, y, 2 * cell_size, cell_size);
-			//print cell value`
+			//print cell value
 			if (game[i][j] != 0) {
 				attron(COLOR_PAIR(val_color_id(game[i][j])));
 				rectangle(x + 1, y + 1, 2 * cell_size - 2, cell_size - 2);
@@ -181,8 +186,6 @@ void draw_menu(WINDOW *window, menu main_menu, int selected)
 	// move the cursor to the center so that the text will be centered
 	move(cursor_pos_y, cursor_pos_x);
 
-	draw_screen_border(window);
-	wrefresh(window);
 	cursor_pos_y = (max_y -  3 * main_menu.option_count) / 2 - 2;
 	cursor_pos_x = (max_x - 15) / 2;
 	for (i = 0; i < main_menu.option_count; i++) {
@@ -202,9 +205,9 @@ void draw_menu(WINDOW *window, menu main_menu, int selected)
 		center_text(string, 14);
 		mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, string);// main_menu.options[i]);
 		cursor_pos_y += 4;
-		//cursor_pos_y += 2;
 		move(cursor_pos_y, cursor_pos_x);
 	}	
+	draw_screen_border(window);
 	wrefresh(window);
 }
 
@@ -237,7 +240,6 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 			attron(COLOR_PAIR(10)); // not highlight color
 		mvaddstr(y, x, themes[k].name);
 		y++;
-		draw_screen_border(window);
 		count = 0;
 		// print cell with its value and color
 		for (i = 2; i <= 2048; i = i * 2) {
@@ -253,43 +255,12 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 		}
 		y += cell_size + 3;
 		x = start_x;
-	}	
+	}
+	draw_screen_border(window);
 	refresh();				
 }
 
-void introduce_name(WINDOW *window, game_stats *game_stats)
-{
-	char name[20] = "";
-	int c, i = 0;
-	int max_x, max_y;
-	//get size of the window
-	getmaxyx(stdscr, max_y, max_x);
-	draw_hs_message(game_stats, name);
-
-	while(c != '\n') {
-		if (resize(&max_x, &max_y) == 1) {
-			draw_game(window, game_stats->game);
-			draw_end_game(game_stats->game_status);
-			draw_hs_message(game_stats, name);
-		}
-		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
-			if (c == KEY_BACKSPACE) {
-				if (i >= 1) {
-					name[i - 1] = '\0';
-					i--;
-				}
-			}
-			else if (i < 18) { // maximum 17 characters
-				name[i++] = c;
-				name[i] = '\0';
-			}
-			draw_hs_message(game_stats, name);
-		}
-		c = getch();
-	}
-	strcpy(game_stats->player, name);
-}
-
+// high score or top score message
 void draw_hs_message(game_stats *game_stats, char name[])
 {
 	int max_x, max_y;
@@ -298,7 +269,12 @@ void draw_hs_message(game_stats *game_stats, char name[])
 	int layout_size = 4 * cell_size;
 	int i;
 	int length;
-	char message[40] = "   New high score!    ";
+	char message[40];
+	if (game_stats->score == game_stats->high_score)
+		strcpy(message, "   New high score!    ");
+	else
+		strcpy(message, "    New top score!    ");
+	 
 	length = strlen(message);
 
 	//get size of the window
@@ -308,12 +284,17 @@ void draw_hs_message(game_stats *game_stats, char name[])
 		cursor_pos_y = 1;
 	cursor_pos_y =  (max_y -  layout_size) + 4;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
+	if (cursor_pos_x < R_EDGE + layout_size / 2)
+		cursor_pos_x = R_EDGE + layout_size / 2;
 	move(cursor_pos_y, cursor_pos_x);
 	attron(COLOR_PAIR(TEXT_COLOR));
 	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
 	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 5);
 	mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
-	strcpy(message, " Save the high score! ");
+	if (game_stats->score == game_stats->high_score)
+		strcpy(message, " Save the high score! ");
+	else
+		strcpy(message, "  Save the top score! ");
 	mvaddstr(cursor_pos_y + 2, cursor_pos_x + 1, message);
 	strcpy(message, "    Type your name:   ");
 	mvaddstr(cursor_pos_y + 3, cursor_pos_x + 1, message);
@@ -329,6 +310,7 @@ void draw_hs_message(game_stats *game_stats, char name[])
 	mvaddstr(cursor_pos_y, cursor_pos_x, name);
 }
 
+// game over or you won message
 void draw_end_game(int game_status)
 {
 	int max_x, max_y;
@@ -349,10 +331,62 @@ void draw_end_game(int game_status)
 	if(cursor_pos_y < 1)
 		cursor_pos_y = 1;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
+	if (cursor_pos_x < R_EDGE + layout_size / 2)
+		cursor_pos_x = R_EDGE + layout_size / 2;
 	move(cursor_pos_y, cursor_pos_x);
 	attron(COLOR_PAIR(TEXT_COLOR));
 
 	fill_rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
 	rectangle(cursor_pos_x, cursor_pos_y, length + 1, 2);
 	mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, message);
+}
+
+// top scores window
+void draw_top_scores(WINDOW *window, top_score top_scores[])
+{
+    clear();
+	int max_x, max_y, x = 10, y = 10;
+	char score[20] = "Score";
+	char time[20] = "Time";
+	char name[20] = "Name";
+	int len = 20, k;
+
+	// get max size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	x = (max_x - 3 * len) / 2;
+	y = max_y / SCORES;
+
+	attron(COLOR_PAIR(3));
+	fill_rectangle(x, y, max_x - 2 * x, 2);
+	attron(COLOR_PAIR(4));
+	rectangle(x, y, max_x - 2 * x, 2);
+	center_text(score, len);
+	center_text(time, len);
+	center_text(name, len);
+	y++;
+	mvaddstr(y, x + 1, score);
+	mvaddstr(y, x + len, time);
+	mvaddstr(y, x + 2 * len, name);
+
+	for (k = 0; k < SCORES; k++) {
+		y += 3;
+		move(y, x);
+		attron(COLOR_PAIR(2));
+		fill_rectangle(x, y, max_x - 2 * x, 2);
+		attron(COLOR_PAIR(TEXT_COLOR));
+		rectangle(x, y, max_x - 2 * x, 2);
+		y++;
+		
+		int_to_string(score, top_scores[k].score, 0);
+		int_to_string(time, top_scores[k].time, 0);
+		strcpy(name, top_scores[k].player);
+		center_text(score, len);
+		center_text(time, len);
+		center_text(name, len);
+		mvaddstr(y, x + 1, score);
+		mvaddstr(y, x + len, time);
+		mvaddstr(y, x + 2 * len, name);
+	}
+	draw_screen_border(window);
+	refresh();
 }

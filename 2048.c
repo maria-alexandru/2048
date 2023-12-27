@@ -9,7 +9,6 @@
 #include "theme.h"
 #include "storage.h"
 
-
 void start_game(WINDOW *window, game_stats *game_stats);
 void reset_game(game_stats *game_stats);
 
@@ -27,7 +26,7 @@ int init()
 	cbreak(); // no buffering	
 	curs_set(0); // hide cursor
 	srand(time(NULL));
-	
+
 	init_pair(1, COLOR_WHITE, COLOR_WHITE);
 	bkgd(COLOR_PAIR(1));
 	refresh();
@@ -67,11 +66,77 @@ int check_winner(int game[][5])
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
-			if (game[i][j] == 2048)
+			if (game[i][j] == 32)
 				return 1; // win
 
 	// continue game
 	return 0;
+}
+
+void introduce_name(WINDOW *window, game_stats *game_stats, char name[])
+{
+	int c, i = 0;
+	int max_x, max_y;
+	//get size of the window
+	getmaxyx(stdscr, max_y, max_x);
+	draw_hs_message(game_stats, name);
+
+	while(c != '\n') {
+		if (resize(&max_x, &max_y) == 1) {
+			draw_game(window, game_stats->game);
+			draw_end_game(game_stats->game_status);
+			draw_hs_message(game_stats, name);
+		}
+		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
+			if (c == KEY_BACKSPACE) {
+				if (i >= 1) {
+					name[i - 1] = '\0';
+					i--;
+				}
+			}
+			else if (i < 18) { // maximum 17 characters
+				name[i++] = c;
+				name[i] = '\0';
+			}
+			draw_hs_message(game_stats, name);
+		}
+		c = getch();
+	}
+}
+
+int is_top_score(game_stats game_stats)
+{
+	int i = SCORES - 1;
+	while (i >= 0 && game_stats.top_scores[i].score != game_stats.score) {
+		i--;
+	}
+	if (i >= 0 && game_stats.playing_time == game_stats.top_scores[i].time)
+		return 0; // the score is already in top scores list
+
+	// if current score is greater than the last top score, it is a top score
+	if ((game_stats.score > game_stats.top_scores[SCORES - 1].score))
+		return 1;
+	
+	if (game_stats.score == game_stats.top_scores[SCORES - 1].score && 
+		game_stats.playing_time < game_stats.top_scores[SCORES - 1].time)
+		return 1;
+
+	return 0;
+}
+
+void add_top_score(game_stats *game_stats, char name[])
+{
+	int i;
+	i = SCORES - 1;
+	while (i >= 0 && game_stats->top_scores[i].score < game_stats->score) {
+		game_stats->top_scores[i] = game_stats->top_scores[i - 1];
+		i--;
+	}
+	i++;
+	game_stats->top_scores[i].score = game_stats->score;
+	game_stats->top_scores[i].time = game_stats->playing_time;
+
+	strcpy(game_stats->top_scores[i].player, name);
 }
 
 // return 1 if high score has changed
@@ -95,27 +160,39 @@ void end_game(WINDOW *window, game_stats *game_stats)
 	int key;
 	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x);
-	int new_high_score = 0;
+	int new_high_score = 0, new_top_score = 0;
+	char name[20]="";
+
 	if (game_stats->game_status != 0) {
 		clear();
 		draw_game(window, game_stats->game);
 		draw_end_game(game_stats->game_status);
 		new_high_score = update_high_score(game_stats);
-		if (new_high_score == 1) {
-			introduce_name(window, game_stats);//draw_hs_message(game_stats);
+		new_top_score = is_top_score(*game_stats);
+		if (new_high_score == 1 || new_top_score == 1) {
+			introduce_name(window, game_stats, name);
+			if (new_high_score == 1)
+				strcpy(game_stats->player, name);
+			if (new_top_score == 1)
+				add_top_score(game_stats, name);
+
 			clear();
 			draw_game(window, game_stats->game);
 			draw_end_game(game_stats->game_status);
 			new_high_score = 0;
+			save_top_score(game_stats->top_scores);
 			save_game(*game_stats);
 		}
 		// wait until Q is pressed to exit
 		while (1) {
 			if (resize(&max_x, &max_y) == 1) { // terminal window was resized
+				info_panel(*game_stats, game_stats->game_status);
 				draw_game(window, game_stats->game);
 				draw_end_game(game_stats->game_status);
 			}
+
 			info_panel(*game_stats, game_stats->game_status);
+			draw_screen_border(window);
 			key = getch();
 			if (key == 'Q')
 				break;
@@ -185,8 +262,11 @@ void start_game(WINDOW *window, game_stats *game_stats)
 	start_time = time(NULL);
 	nodelay(stdscr, TRUE);
 	while(1) {
-		if (resize(&max_x, &max_y) == 1) // terminal window was resized
+		if (resize(&max_x, &max_y) == 1) {
+			// terminal window was resized
+			info_panel(*game_stats, game_stats->game_status);
 			draw_game(window, game_stats->game);
+		}
 
 		game_stats->game_status = check_winner(game_stats->game);
 		if (game_stats->game_status == 1 || game_stats->game_status == -1)
@@ -195,6 +275,7 @@ void start_game(WINDOW *window, game_stats *game_stats)
 		curr_time = time(NULL);
 		game_stats->playing_time = playing_time_aux + (int)difftime(curr_time, start_time);
 		info_panel(*game_stats, game_stats->game_status);
+		draw_screen_border(window);
 		key = getch();
 
 		// if there was no input for timeout_sec seconds, move automatically		
@@ -258,6 +339,23 @@ void open_theme_menu(WINDOW *window, theme themes[], int theme_count, int *theme
 	}
 }
 
+void open_top_scores(WINDOW *window, top_score top_scores[])
+{
+	int max_x, max_y;
+	getmaxyx(stdscr, max_y, max_x);
+	draw_top_scores(window, top_scores);
+
+	while(1){
+		if (resize(&max_x, &max_y) == 1) {
+			draw_top_scores(window, top_scores);
+			refresh();
+		}
+		int key = getch();
+		if (key == 'Q')
+			break;
+	}
+}
+
 void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, 
 					theme themes[], int theme_count)
 {
@@ -291,18 +389,17 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu,
 				move(0, 0);
 				reset_game(game_stats);
 				start_game(window, game_stats);
-				clear();
 			} else if (strcmp(main_menu.options[selected], "Resume") == 0) {
 					if (game_stats->game_in_progress == 1) {
 						move(0, 0);
 						game_stats->game_in_progress = 1;
 						start_game(window, game_stats);
-						clear();
 					}
 			} else if (strcmp(main_menu.options[selected], "Theme") == 0) {
 				open_theme_menu(window, themes, theme_count, &game_stats->theme_id);
 				save_game(*game_stats);
-				clear();
+			} else if (strcmp(main_menu.options[selected], "Top Scores") == 0) {
+				open_top_scores(window, game_stats->top_scores);
 			}
 		}
 		clear();
@@ -320,19 +417,23 @@ int main()
 	theme themes[10];
 	int theme_count = 0;
 
-	main_menu.option_count = 4;
+	main_menu.option_count = 5;
 	strcpy(main_menu.options[0], "New Game");
 	strcpy(main_menu.options[1], "Resume");
 	strcpy(main_menu.options[2], "Theme");
-	strcpy(main_menu.options[3], "Quit");
+	strcpy(main_menu.options[3], "Top Scores");
+	strcpy(main_menu.options[4], "Quit");
 
 	upload_game(&game_stats);
 	copy_info(game_stats.game, game_stats.old_game);
 	game_stats.old_score = game_stats.score;
+	upload_top_score(game_stats.top_scores);
+
 	theme_count = read_themes(themes);
 	set_theme(themes[game_stats.theme_id]);	
 	open_main_menu(window, &game_stats, main_menu, themes, theme_count);
 	save_game(game_stats);
+	save_top_score(game_stats.top_scores);
 
 	delwin(window);
 	endwin();

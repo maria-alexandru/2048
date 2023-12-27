@@ -8,8 +8,15 @@
 #include <stdlib.h>
 #define MAX_OPTIONS 10
 #define MAX_OPTION_LENGHT 30
+#define SCORES 8
 
-typedef struct{
+typedef struct {
+    int score;
+    int time;
+    char player[20];
+}top_score;
+
+typedef struct {
 	int game[5][5];
     int game_in_progress; // 0 or 1
 	int score;
@@ -21,6 +28,7 @@ typedef struct{
 	int old_game[5][5];
 	int old_score;
 	int game_status; // 0 for game in progress, 1 for win, -1 for loss
+	top_score top_scores[SCORES];
 }game_stats;
 
 typedef struct{

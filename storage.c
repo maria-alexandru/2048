@@ -1,6 +1,7 @@
 #include "storage.h"
 #include "utils.h"
 #define GAME_FILE "game.txt"
+#define SCORE_FILE "scores.txt"
 
 void save_game(game_stats game_stats)
 {
@@ -65,5 +66,50 @@ void upload_game(game_stats *game_stats)
                 game_stats->game[i][j] = 0;
         }
         save_game(*game_stats);
+    }
+}
+
+void save_top_score(top_score top_scores[])
+{
+    int i;
+    FILE *f;
+    f = fopen(SCORE_FILE, "w");
+    if (f != NULL) {
+        for (i = 0; i < SCORES; i++) {
+            fprintf(f, "%d\n", top_scores[i].score);
+            fprintf(f, "%d\n", top_scores[i].time);
+            fprintf(f, "%s\n", top_scores[i].player);
+        }
+        fclose(f);
+    }
+}
+
+void upload_top_score(top_score top_scores[])
+{
+    int i;
+    FILE *f;
+    f = fopen(SCORE_FILE, "rw");
+	if (f == NULL) {
+        // if file does not exist, create it
+        f = fopen(SCORE_FILE, "wr");
+    }
+    if (fscanf(f, "%d", &top_scores[i].score) != EOF) {
+        fclose(f);
+        f = fopen(SCORE_FILE, "r");
+        for (i = 0; i < SCORES; i++) {
+            fscanf(f, "%d", &top_scores[i].score);
+            fscanf(f, "%d", &top_scores[i].time);
+            fscanf(f, "%s", top_scores[i].player);
+        }        
+        fclose(f);
+    } else {
+        // if file is empty, write it
+        fclose(f);
+        for (i = 0; i < SCORES; i++) {
+            top_scores[i].score = 0;
+            top_scores[i].time = 0;
+            strcpy(top_scores[i].player, " ");
+        }
+        save_top_score(top_scores);
     }
 }
