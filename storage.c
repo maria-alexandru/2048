@@ -18,6 +18,7 @@ void save_game(game_stats game_stats)
         fprintf(f, "%d\n", game_stats.score);
         fprintf(f, "%d\n", game_stats.game_in_progress);
         fprintf(f, "%d\n", game_stats.game_status);
+        fprintf(f, "%d\n", game_stats.auto_move_sec);
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++)
                 fprintf(f, "%d ", game_stats.game[i][j]);
@@ -45,6 +46,7 @@ void upload_game(game_stats *game_stats)
         fscanf(f, "%d", &game_stats->score);
         fscanf(f, "%d", &game_stats->game_in_progress);
         fscanf(f, "%d", &game_stats->game_status);
+        fscanf(f, "%d", &game_stats->auto_move_sec);
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++)
                 fscanf(f, "%d ", &game_stats->game[i][j]);  
@@ -61,6 +63,7 @@ void upload_game(game_stats *game_stats)
         game_stats->score = 0;
         game_stats->game_in_progress = 0;
         game_stats->game_status = 0;
+        game_stats->auto_move_sec = 10;
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++)
                 game_stats->game[i][j] = 0;

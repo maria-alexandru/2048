@@ -73,7 +73,43 @@ int check_winner(int game[][5])
 	return 0;
 }
 
-void introduce_name(WINDOW *window, game_stats *game_stats, char name[])
+void enter_number(WINDOW *window, game_stats *game_stats)
+{
+	int c, i = 0;
+	int max_x, max_y;
+	char number[5] = "";
+	//get size of the window
+	getmaxyx(stdscr, max_y, max_x);
+
+	while(c != '\n') {
+		resize(&max_x, &max_y);
+		draw_auto_move(*game_stats, 3);
+		draw_screen_border(window);
+		refresh();
+		if ( (c >= '0' && c <= '9') || c == KEY_BACKSPACE) {
+			if (c == KEY_BACKSPACE) {
+				if (i >= 1) {
+					number[i - 1] = '\0';
+					i--;
+				}
+			}
+			else if (i < 2) { // maximum 2 digits
+				if (!(i == 0 && c == '0')) {
+					number[i++] = c;
+					number[i] = '\0';
+				}
+			}
+			game_stats->auto_move_sec = atoi(number);
+			draw_auto_move(*game_stats, 3);
+			draw_screen_border(window);
+			refresh();
+		}
+		c = getch();
+	}
+
+}
+
+void enter_name(WINDOW *window, game_stats *game_stats, char name[])
 {
 	int c, i = 0;
 	int max_x, max_y;
@@ -86,6 +122,7 @@ void introduce_name(WINDOW *window, game_stats *game_stats, char name[])
 			draw_game(window, game_stats->game);
 			draw_end_game(game_stats->game_status);
 			draw_hs_message(game_stats, name);
+			draw_screen_border(window);
 		}
 		if ( (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == KEY_BACKSPACE) {
 			if (c == KEY_BACKSPACE) {
@@ -170,7 +207,7 @@ void end_game(WINDOW *window, game_stats *game_stats)
 		new_high_score = update_high_score(game_stats);
 		new_top_score = is_top_score(*game_stats);
 		if (new_high_score == 1 || new_top_score == 1) {
-			introduce_name(window, game_stats, name);
+			enter_name(window, game_stats, name);
 			if (new_high_score == 1)
 				strcpy(game_stats->player, name);
 			if (new_top_score == 1)
@@ -245,7 +282,7 @@ void start_game(WINDOW *window, game_stats *game_stats)
 	getmaxyx(stdscr, max_y, max_x);
 	int key;
 	time_t start_time, curr_time;
-	int timeout_sec = 10;
+	int timeout_sec = game_stats->auto_move_sec;
 	int playing_time_aux = game_stats->playing_time;
 
 	// a new game was started
@@ -279,7 +316,7 @@ void start_game(WINDOW *window, game_stats *game_stats)
 		key = getch();
 
 		// if there was no input for timeout_sec seconds, move automatically		
-		if (difftime(curr_time, start_time) >= timeout_sec) {
+		if (timeout_sec != -1 && difftime(curr_time, start_time) >= timeout_sec) {
 			key = auto_move(game_stats->game);
 			save_game(*game_stats); // save the game
 		}
@@ -347,17 +384,157 @@ void open_top_scores(WINDOW *window, top_score top_scores[])
 
 	while(1){
 		if (resize(&max_x, &max_y) == 1) {
+			clear();
 			draw_top_scores(window, top_scores);
+			draw_screen_border(window);
 			refresh();
 		}
 		int key = getch();
-		if (key == 'Q')
+		if (key == 'Q' || key == '\n')
 			break;
 	}
 }
 
-void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu, 
-					theme themes[], int theme_count)
+void open_music(WINDOW *window, game_stats *game_stats)
+{
+	clear();
+	int max_x, max_y;
+	int key, selected = 0;
+	getmaxyx(stdscr, max_y, max_x);
+	draw_screen_border(window);
+	menu music_menu;
+	music_menu.option_count = 5;
+	strcpy(music_menu.options[0], "Music 1");
+	strcpy(music_menu.options[1], "Music 2");
+	strcpy(music_menu.options[2], "Music 3");
+	strcpy(music_menu.options[3], "Music 4");
+	strcpy(music_menu.options[4], "Back");
+
+	while(1){
+		draw_menu(window, music_menu, selected);
+		if (resize(&max_x, &max_y) == 1) {
+			clear();
+			draw_screen_border(window);
+			refresh();
+		}
+
+		key = getch();
+		if (key == KEY_DOWN && selected < music_menu.option_count - 1)
+			selected++;
+		if (key == KEY_UP && selected > 0)
+			selected--;
+		if (key == 'Q')
+			break;
+		// enter is pressed
+		if (key == '\n') {
+			if (strcmp(music_menu.options[selected], "Theme") == 0) {
+			}
+			else if (strcmp(music_menu.options[selected], "Music") == 0) {
+				
+				//clear();
+			} else if (strcmp(music_menu.options[selected], "Auto move") == 0) {
+				
+			} else if (strcmp(music_menu.options[selected], "Back") == 0) {
+				break;
+			} 
+		}
+		clear();
+	}
+
+}
+
+void open_auto_move(WINDOW *window, game_stats *game_stats)
+{
+	int selected, key;
+	int max_x, max_y;
+	getmaxyx(window, max_y, max_x);
+	selected = -1; // back button
+	while(1)
+	{
+		resize(&max_x, &max_y);
+		draw_auto_move(*game_stats, selected);
+		draw_screen_border(window);
+		refresh();
+		key = getch();
+		if (key == 'Q')
+			break;
+		if (key == KEY_RIGHT && selected < 2)
+			selected++;
+		if (key == KEY_LEFT && selected > -1)
+			selected--;
+		if (key == KEY_UP && selected > -1)
+			selected--;
+		if (key == KEY_DOWN && selected < 2)
+			selected++;
+		if (key == '\n') {
+			if (selected == -1) // back
+				break;
+			if (selected == 0) {
+				game_stats->auto_move_sec = -1; // auto move is off
+				break;
+			}
+			else if (selected == 1) {
+				selected = 2;
+			}
+			if (selected == 2) {
+				selected = 3;
+				enter_number(window, game_stats);
+				selected = 2;
+				break;
+			}
+		}
+		refresh();
+	}
+	save_game(*game_stats);
+}
+
+void open_settings(WINDOW *window, game_stats *game_stats)
+{
+	clear();
+	int max_x, max_y;
+	int key, selected = 0;
+	getmaxyx(stdscr, max_y, max_x);
+	draw_screen_border(window);
+	menu settings_menu;
+	settings_menu.option_count = 3;
+	strcpy(settings_menu.options[0], "Theme");
+	//strcpy(settings_menu.options[1], "Music");
+	strcpy(settings_menu.options[1], "Auto move");
+	strcpy(settings_menu.options[2], "Back");
+
+	while(1){
+		resize(&max_x, &max_y);
+		draw_menu(window, settings_menu, selected);
+
+		key = getch();
+		if (key == KEY_DOWN && selected < settings_menu.option_count - 1)
+			selected++;
+		if (key == KEY_UP && selected > 0)
+			selected--;
+		if (key == 'Q')
+			break;
+		// enter is pressed
+		if (key == '\n') {
+			if (strcmp(settings_menu.options[selected], "Theme") == 0) {
+				open_theme_menu(window, game_stats->themes, game_stats->theme_count, &game_stats->theme_id);
+				save_game(*game_stats);
+			}
+			else if (strcmp(settings_menu.options[selected], "Music") == 0) {
+				open_music(window, game_stats);
+				//clear();
+			} else if (strcmp(settings_menu.options[selected], "Auto move") == 0) {
+				open_auto_move(window, game_stats);
+				
+			} else if (strcmp(settings_menu.options[selected], "Back") == 0) {
+				break;
+			} 
+		}
+		clear();
+	}
+
+}
+
+void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu)
 {
 	int key;
 	int max_x, max_y;
@@ -395,11 +572,10 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu,
 						game_stats->game_in_progress = 1;
 						start_game(window, game_stats);
 					}
-			} else if (strcmp(main_menu.options[selected], "Theme") == 0) {
-				open_theme_menu(window, themes, theme_count, &game_stats->theme_id);
-				save_game(*game_stats);
 			} else if (strcmp(main_menu.options[selected], "Top Scores") == 0) {
 				open_top_scores(window, game_stats->top_scores);
+			} else if (strcmp(main_menu.options[selected], "Settings") == 0) {
+				open_settings(window, game_stats);
 			}
 		}
 		clear();
@@ -409,19 +585,18 @@ void open_main_menu(WINDOW *window, game_stats *game_stats, menu main_menu,
 int main()
 {
 	WINDOW *window = initscr();
+
 	if (init() == -1)
 		return 0;
 
 	game_stats game_stats;
 	menu main_menu;
-	theme themes[10];
-	int theme_count = 0;
 
 	main_menu.option_count = 5;
 	strcpy(main_menu.options[0], "New Game");
 	strcpy(main_menu.options[1], "Resume");
-	strcpy(main_menu.options[2], "Theme");
-	strcpy(main_menu.options[3], "Top Scores");
+	strcpy(main_menu.options[2], "Top Scores");
+	strcpy(main_menu.options[3], "Settings");
 	strcpy(main_menu.options[4], "Quit");
 
 	upload_game(&game_stats);
@@ -429,9 +604,9 @@ int main()
 	game_stats.old_score = game_stats.score;
 	upload_top_score(game_stats.top_scores);
 
-	theme_count = read_themes(themes);
-	set_theme(themes[game_stats.theme_id]);	
-	open_main_menu(window, &game_stats, main_menu, themes, theme_count);
+	game_stats.theme_count = read_themes(game_stats.themes);
+	set_theme(game_stats.themes[game_stats.theme_id]);	
+	open_main_menu(window, &game_stats, main_menu);
 	save_game(game_stats);
 	save_top_score(game_stats.top_scores);
 

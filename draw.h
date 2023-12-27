@@ -37,4 +37,6 @@ void draw_end_game(int game_status);
 
 void draw_top_scores(WINDOW *window, top_score top_scores[]);
 
+void draw_auto_move(game_stats game_stats, int selected);
+
 #endif

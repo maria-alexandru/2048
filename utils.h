@@ -6,6 +6,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
+#include "theme.h"
 #define MAX_OPTIONS 10
 #define MAX_OPTION_LENGHT 30
 #define SCORES 8
@@ -23,12 +24,15 @@ typedef struct {
 	int playing_time; // in seconds
 	int high_score;
 	int high_score_time; // in seconds
-    int theme_id;
 	char player[20];
 	int old_game[5][5];
 	int old_score;
 	int game_status; // 0 for game in progress, 1 for win, -1 for loss
 	top_score top_scores[SCORES];
+	int auto_move_sec;
+    int theme_id;
+	int theme_count;
+	theme themes[10];
 }game_stats;
 
 typedef struct{

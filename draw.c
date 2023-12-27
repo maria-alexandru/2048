@@ -2,6 +2,11 @@
 #define LINE_COLOR 18
 #define TEXT_COLOR 19
 #define R_EDGE 25
+#define U_EDGE 5
+#define SELECTED_T 9
+#define SELECTED_C 11
+#define NOT_SELECTED_T 19
+#define NOT_SELECTED_C 19
 
 void draw_screen_border(WINDOW *window)
 {
@@ -143,6 +148,8 @@ void draw_game(WINDOW *window, int game[][5])
 	getmaxyx(stdscr, max_y, max_x);
 	cursor_pos_y = (max_y -  layout_size) / 2 ;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2;
+	if (cursor_pos_y < U_EDGE)
+		cursor_pos_y = U_EDGE;
 	if (cursor_pos_x < R_EDGE)
 		cursor_pos_x = R_EDGE;
 	move(cursor_pos_y, cursor_pos_x);
@@ -214,15 +221,15 @@ void draw_menu(WINDOW *window, menu main_menu, int selected)
 void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int selected)
 {
 	clear();
-	int max_x, max_y, x = 10, y = 10, start_x = 3, start_y = 3;
+	int x = 10, y = 10, start_x = 3, start_y = 3;
 	int i, k;
-	int cell_size = 4;
+	int cell_size = 4, size_x = 23 * cell_size ;
 	int key;
-	int new_max_x, new_max_y;
 	int count = 0;
-
-	// get max size of the window
-	getmaxyx(stdscr, max_y, max_x);
+	getmaxyx(window, y, start_x);
+	start_x = start_x / 2 - size_x / 2 ;
+	if (start_x < 3)
+		start_x = 3;
 	x = start_x;
 	y = start_y;
 	for (k = 0; k < theme_count; k++) {
@@ -231,8 +238,8 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 			attron(COLOR_PAIR(11)); // highlight color
 		else
 			attron(COLOR_PAIR(12)); // not highlight color
-		rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
-		fill_rectangle(x - 1, y - 1, max_x - 5, cell_size + 2);
+		rectangle(x - 1, y - 1, size_x, cell_size + 2);
+		fill_rectangle(x - 1, y - 1, size_x, cell_size + 2);
 		attroff(A_STANDOUT);
 		if (selected == k)
 			attron(COLOR_PAIR(9)); // highlight color
@@ -279,10 +286,9 @@ void draw_hs_message(game_stats *game_stats, char name[])
 
 	//get size of the window
 	getmaxyx(stdscr, max_y, max_x);
-	cursor_pos_y = (max_y -  layout_size) / 2 - 4;
-	if(cursor_pos_y < 1)
-		cursor_pos_y = 1;
-	cursor_pos_y =  (max_y -  layout_size) + 4;
+	cursor_pos_y =  (max_y - layout_size) / 2 + layout_size + 4;
+	if(cursor_pos_y <  layout_size + U_EDGE + 2)
+		cursor_pos_y = layout_size + U_EDGE + 2;
 	cursor_pos_x = (max_x - 2 * layout_size) / 2 + layout_size - length / 2;
 	if (cursor_pos_x < R_EDGE + layout_size / 2)
 		cursor_pos_x = R_EDGE + layout_size / 2;
@@ -296,11 +302,11 @@ void draw_hs_message(game_stats *game_stats, char name[])
 	else
 		strcpy(message, "  Save the top score! ");
 	mvaddstr(cursor_pos_y + 2, cursor_pos_x + 1, message);
-	strcpy(message, "    Type your name:   ");
+	strcpy(message, "   Enter your name:   ");
 	mvaddstr(cursor_pos_y + 3, cursor_pos_x + 1, message);
 	strcpy(message, "                      ");
 	mvaddstr(cursor_pos_y + 4, cursor_pos_x + 1, message);
-
+	
 	start_x = cursor_pos_x;
 	cursor_pos_y += 4;
 	cursor_pos_x += length / 2;
@@ -350,16 +356,29 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 	char time[20] = "Time";
 	char name[20] = "Name";
 	int len = 20, k;
+	x = 4; y = 2;
+
+	attron(A_STANDOUT);
+	attron(COLOR_PAIR(3));
+	fill_rectangle(x, y, 10, 2);
+	attron(COLOR_PAIR(4));
+	rectangle(x, y, 14, 2);
+	mvaddstr(y + 1, x + 1, "    Back     ");
+	attroff(A_STANDOUT);
 
 	// get max size of the window
 	getmaxyx(stdscr, max_y, max_x);
 	x = (max_x - 3 * len) / 2;
+	if (x < R_EDGE)
+		x = R_EDGE;
 	y = max_y / SCORES;
+	if (y < 2)
+		y = 2;
 
 	attron(COLOR_PAIR(3));
-	fill_rectangle(x, y, max_x - 2 * x, 2);
+	fill_rectangle(x, y, 3 * len, 2);
 	attron(COLOR_PAIR(4));
-	rectangle(x, y, max_x - 2 * x, 2);
+	rectangle(x, y, 3 * len, 2);
 	center_text(score, len);
 	center_text(time, len);
 	center_text(name, len);
@@ -372,9 +391,9 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 		y += 3;
 		move(y, x);
 		attron(COLOR_PAIR(2));
-		fill_rectangle(x, y, max_x - 2 * x, 2);
+		fill_rectangle(x, y, 3 * len, 2);
 		attron(COLOR_PAIR(TEXT_COLOR));
-		rectangle(x, y, max_x - 2 * x, 2);
+		rectangle(x, y, 3 * len, 2);
 		y++;
 		
 		int_to_string(score, top_scores[k].score, 0);
@@ -389,4 +408,104 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 	}
 	draw_screen_border(window);
 	refresh();
+}
+
+void draw_auto_move(game_stats game_stats, int selected)
+{
+	int max_x, max_y;
+	int x, y;
+	char number[10] = "", message[100] = "";
+	int len;
+
+	clear();
+	getmaxyx(stdscr, max_y, max_x);
+	y = max_y / 5;
+	x = max_x / 2 - 16;
+	move(y, x);
+
+	attron(COLOR_PAIR(2));
+	fill_rectangle(x, y, 32, 6);
+	attron(COLOR_PAIR(4));
+	rectangle(x, y, 32, 6);
+
+	mvaddstr(y + 1, x + 1, "If you do not press a key after");
+	mvaddstr(y + 2, x + 1, "a period of time, the game will");
+	mvaddstr(y + 3, x + 1, "  move  automatically for you  ");
+	mvaddstr(y + 4, x + 1, "                               ");
+	len = strlen("                               ");
+
+	y += 4;		
+	if (game_stats.auto_move_sec == -1 || game_stats.auto_move_sec == 0) {
+		strcpy(message, "Auto move is off");
+		center_text(message, len);
+		mvaddstr(y + 1, x + 1, message);
+
+	}
+	else {
+		int_to_string(number, game_stats.auto_move_sec, 0);
+		strcpy(message, "Auto move is on, ");
+		strcat(message, number);
+		strcat(message, " seconds");
+		center_text(message, len);
+		mvaddstr(y + 1, x + 1, message);
+	}
+
+	attron(COLOR_PAIR(TEXT_COLOR));
+
+	y += 4;
+	x += 9;
+	if (selected == -1) 
+		attron(A_STANDOUT);
+	fill_rectangle(x, y, 10, 2);
+	rectangle(x, y, 14, 2);
+	mvaddstr(y + 1, x + 1, "    Back     ");
+	attroff(A_STANDOUT);
+	y += 5;
+	x -= 5;
+
+
+	if (selected == 0)
+		attron(A_STANDOUT);
+	fill_rectangle(x, y, 11, 2);
+	rectangle(x, y, 11, 2);
+	mvaddstr(y + 1, x + 1, " Turn off ");
+	attroff(A_STANDOUT);
+
+	x+=15;
+	if (selected == 1) 
+		attron(A_STANDOUT);
+	fill_rectangle(x, y, 10, 2);
+	rectangle(x, y, 10, 2);
+	mvaddstr(y + 1, x + 1, " Turn on ");
+	attroff(A_STANDOUT);
+
+	x -= 10;
+	y += 5;
+	if (selected == 2)
+		attron(A_STANDOUT);
+	fill_rectangle(x, y, 14, 2);
+	rectangle(x, y, 14, 2);
+	mvaddstr(y + 1, x + 1, " Change time ");
+	attroff(A_STANDOUT);
+
+	if (selected == 3) {
+		y += 8;
+		x -= 4;
+		attron(COLOR_PAIR(2));
+		fill_rectangle(x, y, 21, 3);
+		attron(COLOR_PAIR(4));
+		rectangle(x, y, 21, 3);
+		mvaddstr(y + 1, x + 1, "   Enter a number   ");
+		mvaddstr(y + 2, x + 1, "  between 1 and 99  ");
+		x += 8;
+		y -= 4;
+		fill_rectangle(x, y, 5, 2);
+		rectangle(x, y, 5, 2);
+		int_to_string(number, game_stats.auto_move_sec, 0);
+		center_text(number, 4);
+		if (game_stats.auto_move_sec != -1 && game_stats.auto_move_sec != 0)
+			mvaddstr(y + 1, x + 1, number);
+		else
+			mvaddstr(y + 1, x + 1, "    ");
+	}
 }
