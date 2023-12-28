@@ -42,13 +42,13 @@ typedef struct{
 
 int resize(int *max_x, int *max_y);
 
-char* timestr(struct tm t, char* time); // create a string with current time
+char* timestr(struct tm t, char* time);
 
-char* datestr(struct tm t, char* date); // create a string with current date
+char* datestr(struct tm t, char* date);
 
 void int_to_string(char *s, int val, int format);
 
-int val_color_id(int val); // convert cell value to its color id
+int val_color_id(int val);
 
 char *timestr_sec(int sec, char *time);
 

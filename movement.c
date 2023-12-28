@@ -1,14 +1,20 @@
 #include "movement.h"
 
+/*
+* Copy values from game matrix to game_copy matrix
+*/
 void copy_info(int game[][5], int game_copy[][5])
 {
 	int i, j;
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
-			game_copy[i][j] = game[i][j];	
+			game_copy[i][j] = game[i][j];
 }
 
-int count_cells(int game[][5])
+/*
+* Count total number of occupied tiles in a given game matrix and return it
+*/
+int count_tiles(int game[][5])
 {
 	int i, j;
 	int total = 0;
@@ -19,51 +25,61 @@ int count_cells(int game[][5])
 	return total;
 }
 
-// check all moves and choose the one that frees the maximum number of cells
+/*
+* Check all possible moves and choose the one that empties the maximum number of
+* tiles
+*/
 int auto_move(int game[][5])
 {
 	int game_copy[5][5];
 	int i, j;
 	int score_copy = 0;
-	int total_cell_min = 16, total_cell = 0;
+	int total_tile_min = 16, total_tile = 0;
 	int operation = '\0';
 	int valid = 0;
 
 	copy_info(game, game_copy);
 	valid = move_down(game_copy, &score_copy);
-	total_cell = count_cells(game_copy);
-	if (valid == 1 && total_cell <= total_cell_min) {
-		total_cell_min = total_cell;
+	total_tile = count_tiles(game_copy);
+	if (valid == 1 && total_tile <= total_tile_min) {
+		total_tile_min = total_tile;
 		operation = KEY_DOWN;
 	}
 
 	copy_info(game, game_copy);
 	valid = move_up(game_copy, &score_copy);
-	total_cell = count_cells(game_copy);
-	if (valid == 1 && total_cell <= total_cell_min) {
-		total_cell_min = total_cell;
+	total_tile = count_tiles(game_copy);
+	if (valid == 1 && total_tile <= total_tile_min) {
+		total_tile_min = total_tile;
 		operation = KEY_UP;
 	}
 
 	copy_info(game, game_copy);
 	valid = move_right(game_copy, &score_copy);
-	total_cell = count_cells(game_copy);
-	if (valid == 1 && total_cell <= total_cell_min) {
-		total_cell_min = total_cell;
+	total_tile = count_tiles(game_copy);
+	if (valid == 1 && total_tile <= total_tile_min) {
+		total_tile_min = total_tile;
 		operation = KEY_RIGHT;
 	}
 
 	copy_info(game, game_copy);
 	valid = move_left(game_copy, &score_copy);
-	total_cell = count_cells(game_copy);
-	if (valid == 1 && total_cell <= total_cell_min) {
-		total_cell_min = total_cell;
+	total_tile = count_tiles(game_copy);
+	if (valid == 1 && total_tile <= total_tile_min) {
+		total_tile_min = total_tile;
 		operation = KEY_LEFT;
 	}
 
 	return operation;
 }
 
+/*
+* Search tiles that are not 0 on each row
+* If only a tile is found, move it on the first position in the row
+* If more than one tile is found, combine the first two values in the row,
+* then the next two if they exist and then move all tiles to
+* the left
+*/
 int move_left(int game[][5], int *score)
 {
 	int i, j, k, p1, aux1, aux2;
@@ -72,75 +88,19 @@ int move_left(int game[][5], int *score)
 	for (i = 0; i < 4; i++) {
 		k = 0;
 		for (j = 0; j < 4; j++) {
-			// search a cell that is not 0
+			// search a tile that is not 0
 			while (j < 4 && game[i][j] == 0)
 				j++;
 			p1 = j;
-			// if a cell was found
+			// if a tile was found
 			if (j < 4) {
 				j++;
-				// search another cell that is not 0
+				// search another tile that is not 0
 				while (j < 4 && game[i][j] == 0)
 					j++;
-				// another cell was found
+				// another tile was found
 				if (j < 4) {
-					// if the values are equal, add them into one cell
-					if (game[i][j] == game[i][p1]) {
-						valid = 1;
-						aux1 = game[i][j];
-						aux2 = game[i][p1];
-						game[i][j] = 0;
-						game[i][p1] = 0;
-						game[i][k] = aux1 + aux2;
-						*score += game[i][k];
-					} else{
-						// if the values are not equal, move the cells
-						if (p1 != k || j != k + 1)
-							valid = 1;
-						aux1 = game[i][j];
-						aux2 = game[i][p1];
-						game[i][p1] = 0;
-						game[i][j] = 0;		
-						game[i][k] = aux2;
-						game[i][k+1] = aux1;						
-					}
-					k++;
-					j = k-1;
-				} else {
-					// just a cell on the line
-					if (p1 != k)
-						valid = 1;
-					aux1 = game[i][p1];
-					game[i][p1] = 0;
-					game[i][k] = aux1;
-				}
-			}
-		}
-	}
-	return valid;
-}
-
-int move_right(int game[][5], int *score)
-{
-	int i, j, k, p1, aux1, aux2;
-	int valid = 0;
-
-	for (i = 0; i < 4; i++) {
-		k = 3;
-		for (j = 3; j >= 0; j--) {
-			// search a cell that is not 0
-			while (j >= 0 && game[i][j] == 0)
-				j--;
-			p1 = j;
-			// if a cell was found
-			if (j >= 0) {
-				j--;
-				// search another cell that is not 0
-				while (j >= 0 && game[i][j] == 0)
-					j--;
-				// another cell was found
-				if (j >= 0) {
-					// if the values are equal, add them into one cell
+					// if the values are equal, add them into one tile
 					if (game[i][j] == game[i][p1]) {
 						valid = 1;
 						aux1 = game[i][j];
@@ -150,20 +110,20 @@ int move_right(int game[][5], int *score)
 						game[i][k] = aux1 + aux2;
 						*score += game[i][k];
 					} else {
-						// if the values are not equal, move the cells
-						if (p1 != k || j != k - 1)
+						// if the values are not equal, move the tiles
+						if (p1 != k || j != k + 1)
 							valid = 1;
 						aux1 = game[i][j];
 						aux2 = game[i][p1];
 						game[i][p1] = 0;
-						game[i][j] = 0;		
+						game[i][j] = 0;
 						game[i][k] = aux2;
-						game[i][k-1] = aux1;						
+						game[i][k+1] = aux1;
 					}
-					k--;
-					j = k+1;
+					k++;
+					j = k - 1;
 				} else {
-					// just a cell on the line
+					// just a tile on the row
 					if (p1 != k)
 						valid = 1;
 					aux1 = game[i][p1];
@@ -176,6 +136,75 @@ int move_right(int game[][5], int *score)
 	return valid;
 }
 
+/*
+* Search tiles that are not 0 on each row
+* If only a tile is found, move it on the last position in the row
+* If more than one tile is found, combine the last two values in the row,
+* then the next two if they exist and then move all tiles to
+* the right
+*/
+int move_right(int game[][5], int *score)
+{
+	int i, j, k, p1, aux1, aux2;
+	int valid = 0;
+
+	for (i = 0; i < 4; i++) {
+		k = 3;
+		for (j = 3; j >= 0; j--) {
+			// search a tile that is not 0
+			while (j >= 0 && game[i][j] == 0)
+				j--;
+			p1 = j;
+			// if a tile was found
+			if (j >= 0) {
+				j--;
+				// search another tile that is not 0
+				while (j >= 0 && game[i][j] == 0)
+					j--;
+				// another tile was found
+				if (j >= 0) {
+					// if the values are equal, add them into one tile
+					if (game[i][j] == game[i][p1]) {
+						valid = 1;
+						aux1 = game[i][j];
+						aux2 = game[i][p1];
+						game[i][j] = 0;
+						game[i][p1] = 0;
+						game[i][k] = aux1 + aux2;
+						*score += game[i][k];
+					} else {
+						// if the values are not equal, move the tiles
+						if (p1 != k || j != k - 1)
+							valid = 1;
+						aux1 = game[i][j];
+						aux2 = game[i][p1];
+						game[i][p1] = 0;
+						game[i][j] = 0;
+						game[i][k] = aux2;
+						game[i][k-1] = aux1;
+					}
+					k--;
+					j = k + 1;
+				} else {
+					// just a tile on the row
+					if (p1 != k)
+						valid = 1;
+					aux1 = game[i][p1];
+					game[i][p1] = 0;
+					game[i][k] = aux1;
+				}
+			}
+		}
+	}
+	return valid;
+}
+
+/*
+* Search tiles that are not 0 on each column
+* If only a tile is found, move it on the first position in the column
+* If more than one tile is found, combine the first two values on the column,
+* then the next two if they exist and then move all tiles up
+*/
 int move_up(int game[][5], int *score)
 {
 	int i, j, k, p1, aux1, aux2;
@@ -184,19 +213,19 @@ int move_up(int game[][5], int *score)
 	for (j = 0; j < 4; j++) {
 		k = 0;
 		for (i = 0; i < 4; i++) {
-			// search a cell that is not 0
+			// search a tile that is not 0
 			while (i < 4 && game[i][j] == 0)
 				i++;
 			p1 = i;
-			// if a cell was found
+			// if a tile was found
 			if (i < 4) {
 				i++;
-				// search another cell that is not 0
+				// search another tile that is not 0
 				while (i < 4 && game[i][j] == 0)
 					i++;
-				// another cell was found
+				// another tile was found
 				if (i < 4) {
-					// if the values are equal, add them into one cell
+					// if the values are equal, add them into one tile
 					if (game[i][j] == game[p1][j]) {
 						valid = 1;
 						aux1 = game[i][j];
@@ -206,20 +235,20 @@ int move_up(int game[][5], int *score)
 						game[k][j] = aux1 + aux2;
 						*score += game[k][j];
 					} else {
-						// if the values are not equal, move the cells
+						// if the values are not equal, move the tiles
 						if (p1 != k || i != k + 1)
 							valid = 1;
 						aux1 = game[i][j];
 						aux2 = game[p1][j];
 						game[p1][j] = 0;
-						game[i][j] = 0;		
+						game[i][j] = 0;
 						game[k][j] = aux2;
-						game[k+1][j] = aux1;				
+						game[k+1][j] = aux1;
 					}
 					k++;
-					i = k-1;
+					i = k - 1;
 				} else {
-					// just a cell on the column
+					// just a tile on the column
 					if (p1 != k)
 						valid = 1;
 					aux1 = game[p1][j];
@@ -232,6 +261,12 @@ int move_up(int game[][5], int *score)
 	return valid;
 }
 
+/*
+* Search tiles that are not 0 on each column
+* If only a tile is found, move it on the last position in the column
+* If more than one tile is found, combine the last two values on the column,
+* then the next two if they exist and then move all tiles down
+*/
 int move_down(int game[][5], int *score)
 {
 	int i, j, k, p1, aux1, aux2;
@@ -240,19 +275,19 @@ int move_down(int game[][5], int *score)
 	for (j = 0; j < 4; j++) {
 		k = 3;
 		for (i = 3; i >= 0; i--) {
-			// search a cell that is not 0
+			// search a tile that is not 0
 			while (i >= 0 && game[i][j] == 0)
 				i--;
 			p1 = i;
-			// if a cell was found
+			// if a tile was found
 			if (i >= 0) {
 				i--;
-				// search another cell that is not 0
+				// search another tile that is not 0
 				while (i >= 0 && game[i][j] == 0)
 					i--;
-				// another cell was found
+				// another tile was found
 				if (i >= 0) {
-					// if the values are equal, add them into one cell
+					// if the values are equal, add them into one tile
 					if (game[i][j] == game[p1][j]) {
 						valid = 1;
 						aux1 = game[i][j];
@@ -262,20 +297,20 @@ int move_down(int game[][5], int *score)
 						game[k][j] = aux1 + aux2;
 						*score += game[k][j];
 					} else {
-						// if the values are not equal, move the cells
+						// if the values are not equal, move the tiles
 						if (p1 != k || i != k - 1)
 							valid = 1;
 						aux1 = game[i][j];
 						aux2 = game[p1][j];
 						game[p1][j] = 0;
-						game[i][j] = 0;		
+						game[i][j] = 0;
 						game[k][j] = aux2;
-						game[k-1][j] = aux1;					
+						game[k-1][j] = aux1;
 					}
 					k--;
-					i = k+1;
+					i = k + 1;
 				} else {
-					// just a cell on the column
+					// just a tile on the column
 					if (p1 != k)
 						valid = 1;
 					aux1 = game[p1][j];

@@ -1,5 +1,8 @@
 #include "theme.h"
 
+/*
+* Read colors from colors.txt and assign them to the themes variable
+*/
 int read_themes(theme themes[])
 {
 	FILE *f;
@@ -10,7 +13,7 @@ int read_themes(theme themes[])
 	if (f == NULL)
 		printf("Color file not found!");
 	else {
-		while(!feof(f)) {
+		while (!feof(f)) {
 			fscanf(f, "%s", themes[count].name);
 			for (i = 0; i < 11; i++) {
 				themes[count].color[i].id = color_id_start + count * 11 + i;
@@ -30,6 +33,9 @@ int read_themes(theme themes[])
 	return count;
 }
 
+/*
+* Create the colors for each theme
+*/
 void initialize_colors(theme theme)
 {
 	int i;
@@ -46,6 +52,9 @@ void initialize_colors(theme theme)
 	init_pair(9, COLOR_BLUE, 11); // not selected text
 }
 
+/*
+* Set a given theme
+*/
 void set_theme(theme theme)
 {
 	int i;
