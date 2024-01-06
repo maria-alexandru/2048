@@ -15,6 +15,7 @@ typedef struct {
     int score;
     int time;
     char player[20];
+	int game_status;
 }top_score;
 
 typedef struct {
