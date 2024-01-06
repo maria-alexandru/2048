@@ -443,7 +443,7 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 			strcpy(win_loss, " ");
 		else if (top_scores[k].game_status == 1)
 			strcpy(win_loss, "Win");
-		else 
+		else
 			strcpy(win_loss, "Loss");
 		if (top_scores[k].score == 0) {
 			strcpy(name, " ");
@@ -452,7 +452,8 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 
 		} else {
 			int_to_string(score, top_scores[k].score, 0);
-			int_to_string(time, top_scores[k].time, 0);
+			timestr_sec(top_scores[k].time, time);
+			strcpy(time, time + 3);
 			strcpy(name, top_scores[k].player);
 		}
 		center_text(score, len);
