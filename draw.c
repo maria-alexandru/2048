@@ -127,8 +127,8 @@ void info_panel(game_stats game_stats, int status)
 	int x, y, size_x, size_y;
 	getmaxyx(stdscr, size_y, size_x);
 	size_x = 21; size_y -= 4;
-	if (size_y < R_EDGE)
-		size_y = R_EDGE;
+	if (size_y < R_EDGE - 4)
+		size_y = R_EDGE - 4;
 	x = 4; y = 3;
 
 	attron(COLOR_PAIR(2));
@@ -394,8 +394,10 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 	char score[20] = "Score";
 	char time[20] = "Time";
 	char name[20] = "Name";
+	char win_loss[20] = "Win/Loss";
 	int len = 20, k;
 	x = 4; y = 2;
+	int columns = 4;
 
 	attron(A_STANDOUT);
 	attron(COLOR_PAIR(3));
@@ -407,7 +409,7 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 
 	// get max size of the window
 	getmaxyx(stdscr, max_y, max_x);
-	x = (max_x - 3 * len) / 2;
+	x = (max_x - columns * len) / 2;
 	if (x < R_EDGE)
 		x = R_EDGE;
 	y = max_y / SCORES;
@@ -415,36 +417,54 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 		y = 2;
 
 	attron(COLOR_PAIR(3));
-	fill_rectangle(x, y, 3 * len, 2);
+	fill_rectangle(x, y, columns * len, 2);
 	attron(COLOR_PAIR(4));
-	rectangle(x, y, 3 * len, 2);
+	rectangle(x, y, columns * len, 2);
 	center_text(score, len);
 	center_text(time, len);
 	center_text(name, len);
+	center_text(win_loss, len);
 	y++;
 	mvaddstr(y, x + 1, score);
 	mvaddstr(y, x + len, time);
 	mvaddstr(y, x + 2 * len, name);
+	mvaddstr(y, x + 3 * len, win_loss);
 
 	for (k = 0; k < SCORES; k++) {
 		y += 3;
 		move(y, x);
 		attron(COLOR_PAIR(2));
-		fill_rectangle(x, y, 3 * len, 2);
+		fill_rectangle(x, y, columns * len, 2);
 		attron(COLOR_PAIR(TEXT_COLOR));
-		rectangle(x, y, 3 * len, 2);
+		rectangle(x, y, columns * len, 2);
 		y++;
 
-		int_to_string(score, top_scores[k].score, 0);
-		int_to_string(time, top_scores[k].time, 0);
-		strcpy(name, top_scores[k].player);
+		if (top_scores[k].game_status == 0)
+			strcpy(win_loss, " ");
+		else if (top_scores[k].game_status == 1)
+			strcpy(win_loss, "Win");
+		else 
+			strcpy(win_loss, "Loss");
+		if (top_scores[k].score == 0) {
+			strcpy(name, " ");
+			strcpy(score, " ");
+			strcpy(time, " ");
+
+		} else {
+			int_to_string(score, top_scores[k].score, 0);
+			int_to_string(time, top_scores[k].time, 0);
+			strcpy(name, top_scores[k].player);
+		}
 		center_text(score, len);
 		center_text(time, len);
 		center_text(name, len);
+		center_text(win_loss, len);
 		mvaddstr(y, x + 1, score);
 		mvaddstr(y, x + len, time);
 		mvaddstr(y, x + 2 * len, name);
+		mvaddstr(y, x + 3 * len, win_loss);
 	}
+
 	draw_screen_border(window);
 	refresh();
 }

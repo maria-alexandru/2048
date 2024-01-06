@@ -28,6 +28,7 @@ int count_tiles(int game[][5])
 /*
 * Check all possible moves and choose the one that empties the maximum number of
 * tiles
+* @return The choosen direction key or 0 if there are no more valid moves
 */
 int auto_move(int game[][5])
 {

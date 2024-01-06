@@ -91,6 +91,7 @@ void save_top_score(top_score top_scores[])
 		for (i = 0; i < SCORES; i++) {
 			fprintf(f, "%d\n", top_scores[i].score);
 			fprintf(f, "%d\n", top_scores[i].time);
+			fprintf(f, "%d\n", top_scores[i].game_status);
 			fprintf(f, "%s\n", top_scores[i].player);
 		}
 		fclose(f);
@@ -116,6 +117,7 @@ void upload_top_score(top_score top_scores[])
 		for (i = 0; i < SCORES; i++) {
 			fscanf(f, "%d", &top_scores[i].score);
 			fscanf(f, "%d", &top_scores[i].time);
+			fscanf(f, "%d", &top_scores[i].game_status);
 			fscanf(f, "%s", top_scores[i].player);
 		}
 		fclose(f);
@@ -125,6 +127,7 @@ void upload_top_score(top_score top_scores[])
 		for (i = 0; i < SCORES; i++) {
 			top_scores[i].score = 0;
 			top_scores[i].time = 0;
+			top_scores[i].game_status = 0;
 			strcpy(top_scores[i].player, " ");
 		}
 		save_top_score(top_scores);

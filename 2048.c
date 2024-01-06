@@ -246,6 +246,7 @@ void end_game(WINDOW *window, game_stats *game_stats)
 			save_top_score(game_stats->top_scores);
 			save_game(*game_stats);
 		}
+		nodelay(stdscr, TRUE);
 		// wait until Q is pressed to exit
 		while (1) {
 			if (resize(&max_x, &max_y) == 1) { // terminal window was resized
@@ -253,7 +254,6 @@ void end_game(WINDOW *window, game_stats *game_stats)
 				draw_game(window, game_stats->game);
 				draw_end_game(game_stats->game_status);
 			}
-
 			info_panel(*game_stats, game_stats->game_status);
 			draw_screen_border(window);
 			key = getch();
@@ -262,6 +262,7 @@ void end_game(WINDOW *window, game_stats *game_stats)
 			else if (key == 'N')
 				break;
 		}
+		nodelay(stdscr, FALSE);
 	}
 	save_game(*game_stats);
 	if (key == 'N') {
@@ -354,15 +355,16 @@ void start_game(WINDOW *window, game_stats *game_stats)
 		// if there was no input for timeout_sec seconds, move automatically
 		if (timeout_sec != -1 && difftime(curr_time, start_time) >= timeout_sec) {
 			key = auto_move(game_stats->game);
-			save_game(*game_stats); // save the game
 		}
 		if (key > 0) {
 			playing_time_aux = game_stats->playing_time;
 			start_time = time(NULL);
 			if (key == 'Q')
 				break;
-			else
+			else {
 				execute_commmand(key, game_stats, window);
+				save_game(*game_stats); // save the game
+			}
 		}
 	}
 	nodelay(stdscr, FALSE);
