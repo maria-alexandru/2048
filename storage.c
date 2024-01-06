@@ -128,7 +128,7 @@ void upload_top_score(top_score top_scores[])
 			top_scores[i].score = 0;
 			top_scores[i].time = 0;
 			top_scores[i].game_status = 0;
-			strcpy(top_scores[i].player, " ");
+			strcpy(top_scores[i].player, "-");
 		}
 		save_top_score(top_scores);
 	}
