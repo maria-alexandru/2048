@@ -2,6 +2,8 @@
 
 - Name: Alexandru Maria-Mihaela
 - Group: 311CC
+- The terminal window should be in its maximized state so that all the options
+in the game are visible.
 
 ## How to play
 
@@ -27,14 +29,14 @@ pressing the UP arrow key or down by pressing the DOWN arrow key.
 	- If two adjacent tiles have the same value and are moved in the same
 direction, they merge into a single tile which has the value 2 times higher than
 the initial one.
-	- By pressing U, the player can undo the last move. This option can undo
+	- By pressing 'U', the player can undo the last move. This option can undo
 only one move, not multiples moves.
 	- If the automatic move option is on and the player is inactive for a
 certain period of time, the game will choose the move that empties the maximum
 number of tiles and execute that move.
 	- On the left side of the screen the player can see the current date and
 time, the score and how much time has passed since the start of the game.
-Information about the highest scorest is displayed below. The player can also
+Information about the highest score is displayed below. The player can also
 take a look at the valid commands, which are shown on this info panel.
 	- If the player reach a 2048 value, it is a win and a corresponding message
 is displayed.
@@ -102,13 +104,13 @@ means that no more valid moves are available.
 
 6. **Bonus tasks**
 	- **Game appearance**
-		- Colors for each theme are loaded from colors.txt file each time when
+		- Colors for each theme are loaded from 'colors.txt' file each time when
 the app is started and they are memorized in a struct variable but also using
 init_color and init_pair ncurses functions, with ids starting from 31.
 		- A new theme is applied by changing the color pairs which are always
 used (ids from 20 to 30) with the color pairs of the selected theme.
 
-	- **Continue the game after closing the app**
+	- **Resume the game after closing the app**
 		- When the app is opened for the first time, a file called 'game.txt' is
 created. In this file are saved information about the selected theme, the
 highscore, the game matrix, etc.
@@ -127,4 +129,4 @@ variable in order to restore it if the player wants to undo a move.
 	- **Configure automatic move**
 		- The seconds of inactivity are stored in a variable which can be
 changed by the player. It has a value from 1 to 99 if the option is on and -1
-if the option is turned off.
+if the option is turned off. It is initially set to five seconds.
