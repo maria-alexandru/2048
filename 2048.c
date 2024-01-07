@@ -294,11 +294,12 @@ void end_game(WINDOW *window, app_info *app_info)
 */
 void execute_commmand(int key, app_info *app_info, WINDOW *window)
 {
+	int game_aux[MAX_DIM][MAX_DIM];
+	int score_aux;
 	// copy the game matrix and the score
-	if (key != 'U') {
-		copy_info(app_info->crt_game.game, app_info->crt_game.old_game,
-				  app_info->size);
-		app_info->crt_game.old_score = app_info->crt_game.score;
+	if (key != 'U' && key >= KEY_DOWN && key <= KEY_RIGHT) {
+		copy_info(app_info->crt_game.game, game_aux, app_info->size);
+		score_aux = app_info->crt_game.score;
 	}
 	int valid = 0;
 	if (key == KEY_DOWN)
@@ -319,6 +320,10 @@ void execute_commmand(int key, app_info *app_info, WINDOW *window)
 				  app_info->size);
 		app_info->crt_game.score = app_info->crt_game.old_score;
 		draw_game(window, app_info->crt_game.game, app_info->size);
+	}
+	if (key != 'U' && valid == 1) {
+		copy_info(game_aux, app_info->crt_game.old_game, app_info->size);
+		app_info->crt_game.old_score = score_aux;
 	}
 
 	if (key == KEY_UP || key == KEY_DOWN || key == KEY_RIGHT ||
