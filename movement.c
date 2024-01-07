@@ -3,23 +3,23 @@
 /*
 * Copy values from game matrix to game_copy matrix
 */
-void copy_info(int game[][5], int game_copy[][5])
+void copy_info(int game[][MAX_DIM], int game_copy[][MAX_DIM], int size)
 {
 	int i, j;
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
+	for (i = 0; i < size; i++)
+		for (j = 0; j < size; j++)
 			game_copy[i][j] = game[i][j];
 }
 
 /*
 * Count total number of occupied tiles in a given game matrix and return it
 */
-int count_tiles(int game[][5])
+int count_tiles(int game[][MAX_DIM], int size)
 {
 	int i, j;
 	int total = 0;
-	for (i = 0; i < 4; i++)
-		for (j = 0; j < 4; j++)
+	for (i = 0; i < size; i++)
+		for (j = 0; j < size; j++)
 			if (game[i][j] != 0)
 				total++;
 	return total;
@@ -30,42 +30,42 @@ int count_tiles(int game[][5])
 * tiles
 * @return The choosen direction key or 0 if there are no more valid moves
 */
-int auto_move(int game[][5])
+int auto_move(int game[][MAX_DIM], int size)
 {
-	int game_copy[5][5];
+	int game_copy[MAX_DIM][MAX_DIM];
 	int i, j;
 	int score_copy = 0;
-	int total_tile_min = 16, total_tile = 0;
+	int total_tile_min = size * size, total_tile = 0;
 	int operation = '\0';
 	int valid = 0;
 
-	copy_info(game, game_copy);
-	valid = move_down(game_copy, &score_copy);
-	total_tile = count_tiles(game_copy);
+	copy_info(game, game_copy, size);
+	valid = move_down(game_copy, &score_copy, size);
+	total_tile = count_tiles(game_copy, size);
 	if (valid == 1 && total_tile <= total_tile_min) {
 		total_tile_min = total_tile;
 		operation = KEY_DOWN;
 	}
 
-	copy_info(game, game_copy);
-	valid = move_up(game_copy, &score_copy);
-	total_tile = count_tiles(game_copy);
+	copy_info(game, game_copy, size);
+	valid = move_up(game_copy, &score_copy, size);
+	total_tile = count_tiles(game_copy, size);
 	if (valid == 1 && total_tile <= total_tile_min) {
 		total_tile_min = total_tile;
 		operation = KEY_UP;
 	}
 
-	copy_info(game, game_copy);
-	valid = move_right(game_copy, &score_copy);
-	total_tile = count_tiles(game_copy);
+	copy_info(game, game_copy, size);
+	valid = move_right(game_copy, &score_copy, size);
+	total_tile = count_tiles(game_copy, size);
 	if (valid == 1 && total_tile <= total_tile_min) {
 		total_tile_min = total_tile;
 		operation = KEY_RIGHT;
 	}
 
-	copy_info(game, game_copy);
-	valid = move_left(game_copy, &score_copy);
-	total_tile = count_tiles(game_copy);
+	copy_info(game, game_copy, size);
+	valid = move_left(game_copy, &score_copy, size);
+	total_tile = count_tiles(game_copy, size);
 	if (valid == 1 && total_tile <= total_tile_min) {
 		total_tile_min = total_tile;
 		operation = KEY_LEFT;
@@ -81,26 +81,26 @@ int auto_move(int game[][5])
 * then the next two if they exist and then move all tiles to
 * the left
 */
-int move_left(int game[][5], int *score)
+int move_left(int game[][MAX_DIM], int *score, int size)
 {
 	int i, j, k, p1, aux1, aux2;
 	int valid = 0;
 
-	for (i = 0; i < 4; i++) {
+	for (i = 0; i < size; i++) {
 		k = 0;
-		for (j = 0; j < 4; j++) {
+		for (j = 0; j < size; j++) {
 			// search a tile that is not 0
-			while (j < 4 && game[i][j] == 0)
+			while (j < size && game[i][j] == 0)
 				j++;
 			p1 = j;
 			// if a tile was found
-			if (j < 4) {
+			if (j < size) {
 				j++;
 				// search another tile that is not 0
-				while (j < 4 && game[i][j] == 0)
+				while (j < size && game[i][j] == 0)
 					j++;
 				// another tile was found
-				if (j < 4) {
+				if (j < size) {
 					// if the values are equal, add them into one tile
 					if (game[i][j] == game[i][p1]) {
 						valid = 1;
@@ -144,14 +144,14 @@ int move_left(int game[][5], int *score)
 * then the next two if they exist and then move all tiles to
 * the right
 */
-int move_right(int game[][5], int *score)
+int move_right(int game[][MAX_DIM], int *score, int size)
 {
 	int i, j, k, p1, aux1, aux2;
 	int valid = 0;
 
-	for (i = 0; i < 4; i++) {
-		k = 3;
-		for (j = 3; j >= 0; j--) {
+	for (i = 0; i < size; i++) {
+		k = size - 1;
+		for (j = size - 1; j >= 0; j--) {
 			// search a tile that is not 0
 			while (j >= 0 && game[i][j] == 0)
 				j--;
@@ -206,26 +206,26 @@ int move_right(int game[][5], int *score)
 * If more than one tile is found, combine the first two values on the column,
 * then the next two if they exist and then move all tiles up
 */
-int move_up(int game[][5], int *score)
+int move_up(int game[][MAX_DIM], int *score, int size)
 {
 	int i, j, k, p1, aux1, aux2;
 	int valid = 0;
 
-	for (j = 0; j < 4; j++) {
+	for (j = 0; j < size; j++) {
 		k = 0;
-		for (i = 0; i < 4; i++) {
+		for (i = 0; i < size; i++) {
 			// search a tile that is not 0
-			while (i < 4 && game[i][j] == 0)
+			while (i < size && game[i][j] == 0)
 				i++;
 			p1 = i;
 			// if a tile was found
-			if (i < 4) {
+			if (i < size) {
 				i++;
 				// search another tile that is not 0
-				while (i < 4 && game[i][j] == 0)
+				while (i < size && game[i][j] == 0)
 					i++;
 				// another tile was found
-				if (i < 4) {
+				if (i < size) {
 					// if the values are equal, add them into one tile
 					if (game[i][j] == game[p1][j]) {
 						valid = 1;
@@ -268,14 +268,14 @@ int move_up(int game[][5], int *score)
 * If more than one tile is found, combine the last two values on the column,
 * then the next two if they exist and then move all tiles down
 */
-int move_down(int game[][5], int *score)
+int move_down(int game[][MAX_DIM], int *score, int size)
 {
 	int i, j, k, p1, aux1, aux2;
 	int valid = 0;
 
-	for (j = 0; j < 4; j++) {
-		k = 3;
-		for (i = 3; i >= 0; i--) {
+	for (j = 0; j < size; j++) {
+		k = size - 1;
+		for (i = size - 1; i >= 0; i--) {
 			// search a tile that is not 0
 			while (i >= 0 && game[i][j] == 0)
 				i--;

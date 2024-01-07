@@ -29,14 +29,14 @@ void draw_menu(WINDOW *window, menu main_menu, int selected);
 
 void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int selected);
 
-void draw_game(WINDOW *window, int game[][5]);
+void draw_game(WINDOW *window, int game[][MAX_DIM], int size);
 
-void draw_hs_message(game_stats *game_stats, char name[]);
+void draw_hs_message(game_stats *game_stats, char name[], int size);
 
-void draw_end_game(int game_status);
+void draw_end_game(int game_status, int size);
 
 void draw_top_scores(WINDOW *window, top_score top_scores[]);
 
-void draw_auto_move(game_stats game_stats, int selected);
+void draw_auto_move(int auto_move_sec, int selected);
 
 #endif

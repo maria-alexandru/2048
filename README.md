@@ -10,6 +10,10 @@ in the game are visible.
 1. **Start screen:**
 	- The main menu will show up and you can navigate through the options using
 the UP arrow key and the DOWN arrow key. Press ENTER to select an option.
+	- The first option is the game mode. You can change it by pressing the RIGHT
+arrow key or the LEFT arrow key. The existing modes are Small (3x3), Classic
+(4x4) and Big (5x5). The 'New Game', 'Resume' and 'Top Scores' options refer to
+the displayed mode.
 	- If you select the 'New Game' option, a new game will start, resetting the
 score and the playing time to 0.
 	- The 'Resume' option will take you back to the last game, if it exists. If
@@ -19,7 +23,8 @@ eight scores, the time in which each was achieved, the name of the player who
 achieved it and if it was a win or a loss.
 	- If you enter the settings submenu, you will be able to modify the
 appearance of the game by choosing the desired theme, you can configure the
-automatic move option or you can return to the main menu.
+automatic move option or you can return to the main menu. These will be the same
+for all game modes.
 	- If you select the 'Quit' option, the game will immediately close.
 
 2. **Gameplay**
@@ -52,6 +57,7 @@ is equal to one of them and has a shorter time.
 	- A score is considered a high score if it is the highest score reached from
 the first time the app was opened or if it is equal to the last high score and
 was achieved in a shorter time.
+	- Each game mode has different high/top scores.
 
 4. **Theme color menu**
 	- The player has five options to choose from for the appearance of the game.
@@ -103,6 +109,14 @@ player won. The game is over when the auto_move function returns 0 because it
 means that no more valid moves are available.
 
 6. **Bonus tasks**
+	- **Game modes**
+		- Information for each game mode is stored in an array of structures.
+When the game mode is modified, the data about the current game will be copied
+from the array.
+		- At the beginning of the game the selected game mode is initialized.
+When the game ends, the array that contains information about each game mode is
+updated.
+
 	- **Game appearance**
 		- Colors for each theme are loaded from 'colors.txt' file each time when
 the app is started and they are memorized in a struct variable but also using
@@ -113,11 +127,11 @@ used (ids from 20 to 30) with the color pairs of the selected theme.
 	- **Resume the game after closing the app**
 		- When the app is opened for the first time, a file called 'game.txt' is
 created. In this file are saved information about the selected theme, the
-highscore, the game matrix, etc.
+highscore, the game matrix, etc. for each game mode.
 		- After each move and especially at the end of a game or before the
 app is closed, these information are updated in the file.
 		- Another file that is created when the app is used for the first time
-is 'scores.txt' where are stored the best 8 scores.
+is 'scores.txt' where are stored the best 8 scores for each game mode.
 		- If the two files already exists, their content will be loaded so that
 the player can continue the game as it was before exiting, with the same
 settings.

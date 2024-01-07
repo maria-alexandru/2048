@@ -10,6 +10,7 @@
 #define MAX_OPTIONS 10
 #define MAX_OPTION_LENGHT 30
 #define SCORES 8
+#define MAX_DIM 6
 
 typedef struct {
     int score;
@@ -18,28 +19,34 @@ typedef struct {
 	int game_status;
 }top_score;
 
-typedef struct {
-	int game[5][5];
+typedef struct{
+    int option_count;
+    char options[MAX_OPTIONS][MAX_OPTION_LENGHT];
+	int selected;
+}menu;
+
+typedef struct{
+    int game[MAX_DIM][MAX_DIM];
     int game_in_progress; // 0 or 1
+	int game_status; // 0 for game in progress, 1 for win, -1 for loss
 	int score;
 	int playing_time; // in seconds
 	int high_score;
 	int high_score_time; // in seconds
 	char player[20];
-	int old_game[5][5];
+	int old_game[MAX_DIM][MAX_DIM];
 	int old_score;
-	int game_status; // 0 for game in progress, 1 for win, -1 for loss
 	top_score top_scores[SCORES];
+}game_stats;
+
+typedef struct {
+	int size;
 	int auto_move_sec;
+	game_stats crt_game, games[MAX_DIM]; 
     int theme_id;
 	int theme_count;
 	theme themes[10];
-}game_stats;
-
-typedef struct{
-    int option_count;
-    char options[MAX_OPTIONS][MAX_OPTION_LENGHT];
-}menu;
+}app_info;
 
 int resize(int *max_x, int *max_y);
 

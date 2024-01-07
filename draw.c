@@ -15,7 +15,8 @@ void draw_screen_border(WINDOW *window)
 {
 	attron(COLOR_PAIR(2));
 	attron(A_STANDOUT);
-	box(window, 0, 0); // border
+	// border
+	box(window, 0, 0); 
 	attroff(A_STANDOUT);
 	attroff(COLOR_PAIR(2));
 	wrefresh(window);
@@ -78,8 +79,8 @@ void print_time_date(int x, int y)
 {
 	char date[20], time_now[20];
 	struct tm *time_p;
-
-	time_t t = time(NULL); // get time
+	// get time
+	time_t t = time(NULL); 
 	time_p = localtime(&t);
 	timestr(*time_p, time_now);
 	datestr(*time_p, date);
@@ -136,15 +137,19 @@ void info_panel(game_stats game_stats, int status)
 	attron(COLOR_PAIR(TEXT_COLOR));
 	rectangle(2, 2, size_x, size_y - 1);
 
-	print_time_date(x, y); // print current date and time
+	// print current date and time
+	print_time_date(x, y);
 	y += 3;
-	print_score_time(game_stats, x, y); // print score and playing time
+	 // print score and playing time
+	print_score_time(game_stats, x, y);
 	y += 3;
-	print_high_score(game_stats, x, y); // print high score info
+	// print high score info
+	print_high_score(game_stats, x, y);
 	y += 6;
 
+	// if game is not over, print valid commands
 	if (status == 0)
-		print_valid_input(x, y); // if game is not over, print valid commands
+		print_valid_input(x, y);
 	else if (status == -1)
 		mvaddstr(y, x, "Game over!");
 	else if (status == 1)
@@ -161,13 +166,13 @@ void info_panel(game_stats game_stats, int status)
 /*
 * Draw the game layout
 */
-void draw_game(WINDOW *window, int game[][5])
+void draw_game(WINDOW *window, int game[][MAX_DIM], int size)
 {
 	clear();
 	int max_x, max_y;
 	int cursor_pos_x, cursor_pos_y;
 	int tile_size = 4;
-	int layout_size = 4 * tile_size;
+	int layout_size = size * tile_size;
 	int i, j;
 	int x, y;
 
@@ -181,8 +186,8 @@ void draw_game(WINDOW *window, int game[][5])
 		cursor_pos_x = R_EDGE;
 	move(cursor_pos_y, cursor_pos_x);
 
-	for (i = 0; i < 4; i++) {
-		for (j = 0; j < 4; j++) {
+	for (i = 0; i < size; i++) {
+		for (j = 0; j < size; j++) {
 			x = cursor_pos_x + j * tile_size * 2;
 			y = cursor_pos_y + i * tile_size;
 			//draw tile
@@ -217,6 +222,8 @@ void draw_menu(WINDOW *window, menu menu, int selected)
 	int cursor_pos_x = 0, cursor_pos_y = 0;
 	int max_x, max_y;
 	int i;
+	int len = 21;
+	char string[30];
 
 	// get max size of the window
 	getmaxyx(stdscr, max_y, max_x);
@@ -224,7 +231,7 @@ void draw_menu(WINDOW *window, menu menu, int selected)
 	move(cursor_pos_y, cursor_pos_x);
 
 	cursor_pos_y = (max_y -  3 * menu.option_count) / 2 - 2;
-	cursor_pos_x = (max_x - 15) / 2;
+	cursor_pos_x = (max_x - len) / 2;
 	for (i = 0; i < menu.option_count; i++) {
 		// highlight option if it is selected
 		if (selected == i)
@@ -233,13 +240,12 @@ void draw_menu(WINDOW *window, menu menu, int selected)
 			attroff(A_STANDOUT);
 
 		attron(COLOR_PAIR(TEXT_COLOR));
-		fill_rectangle(cursor_pos_x, cursor_pos_y, 15, 2);
-		rectangle(cursor_pos_x, cursor_pos_y, 15, 2);
+		fill_rectangle(cursor_pos_x, cursor_pos_y, len, 2);
+		rectangle(cursor_pos_x, cursor_pos_y, len, 2);
 
 		// display options
-		char string[30];
 		strcpy(string, menu.options[i]);
-		center_text(string, 14);
+		center_text(string, len - 1);
 		mvaddstr(cursor_pos_y + 1, cursor_pos_x + 1, string);
 		cursor_pos_y += 4;
 		move(cursor_pos_y, cursor_pos_x);
@@ -303,12 +309,12 @@ void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int select
 /*
 * Draw high score or top score message
 */
-void draw_hs_message(game_stats *game_stats, char name[])
+void draw_hs_message(game_stats *game_stats, char name[], int size)
 {
 	int max_x, max_y;
 	int cursor_pos_x, cursor_pos_y, start_x;
 	int tile_size = 4;
-	int layout_size = 4 * tile_size;
+	int layout_size = size * tile_size;
 	int i;
 	int length;
 	char message[40];
@@ -354,12 +360,12 @@ void draw_hs_message(game_stats *game_stats, char name[])
 /*
 * Draw 'Game over!' or 'You won!' message
 */
-void draw_end_game(int game_status)
+void draw_end_game(int game_status, int size)
 {
 	int max_x, max_y;
 	int cursor_pos_x, cursor_pos_y;
 	int tile_size = 4;
-	int layout_size = 4 * tile_size;
+	int layout_size = size * tile_size;
 	int length;
 	char message[40];
 	if (game_status == -1)
@@ -453,7 +459,8 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 		} else {
 			int_to_string(score, top_scores[k].score, 0);
 			timestr_sec(top_scores[k].time, time);
-			strcpy(time, time + 3);
+			strcpy(name, time + 3);
+			strcpy(time, name);
 			strcpy(name, top_scores[k].player);
 		}
 		center_text(score, len);
@@ -473,7 +480,7 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 /*
 * Draw auto move page, highlight the selected option
 */
-void draw_auto_move(game_stats game_stats, int selected)
+void draw_auto_move(int auto_move_sec, int selected)
 {
 	int max_x, max_y;
 	int x, y;
@@ -497,13 +504,13 @@ void draw_auto_move(game_stats game_stats, int selected)
 	len = strlen("                               ");
 
 	y += 4;
-	if (game_stats.auto_move_sec == -1 || game_stats.auto_move_sec == 0) {
+	if (auto_move_sec == -1 || auto_move_sec == 0) {
 		strcpy(message, "Auto move is off");
 		center_text(message, len);
 		mvaddstr(y + 1, x + 1, message);
 
 	} else {
-		int_to_string(number, game_stats.auto_move_sec, 0);
+		int_to_string(number, auto_move_sec, 0);
 		strcpy(message, "Auto move is on, ");
 		strcat(message, number);
 		strcat(message, " seconds");
@@ -555,9 +562,9 @@ void draw_auto_move(game_stats game_stats, int selected)
 		x += 8;	y -= 4;
 		fill_rectangle(x, y, 5, 2);
 		rectangle(x, y, 5, 2);
-		int_to_string(number, game_stats.auto_move_sec, 0);
+		int_to_string(number, auto_move_sec, 0);
 		center_text(number, 4);
-		if (game_stats.auto_move_sec != -1 && game_stats.auto_move_sec != 0)
+		if (auto_move_sec != -1 && auto_move_sec != 0)
 			mvaddstr(y + 1, x + 1, number);
 		else
 			mvaddstr(y + 1, x + 1, "    ");

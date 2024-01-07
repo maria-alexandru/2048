@@ -3,19 +3,20 @@
 
 #include <stdio.h>
 #include <ncurses.h>
+#include "utils.h"
 
-void copy_info(int game[][5], int game_copy[][5]);
+void copy_info(int game[][MAX_DIM], int game_copy[][MAX_DIM], int size);
 
-int count_cells(int game[][5]);
+int count_tiles(int game[][MAX_DIM], int size);
 
-int auto_move(int game[][5]);
+int auto_move(int game[][MAX_DIM], int size);
 
-int move_left(int game[][5], int *score);
+int move_left(int game[][MAX_DIM], int *score, int size);
 
-int move_right(int game[][5], int *score);
+int move_right(int game[][MAX_DIM], int *score, int size);
 
-int move_up(int game[][5], int *score);
+int move_up(int game[][MAX_DIM], int *score, int size);
 
-int move_down(int game[][5], int *score);
+int move_down(int game[][MAX_DIM], int *score, int size);
 
 #endif
