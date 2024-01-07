@@ -38,7 +38,7 @@ int init()
 */
 void enter_number(WINDOW *window, game_stats *game_stats)
 {
-	int c, i = 0;
+	int c = '\0', i = 0;
 	int max_x, max_y;
 	char number[5] = "";
 	//get size of the window
@@ -61,6 +61,7 @@ void enter_number(WINDOW *window, game_stats *game_stats)
 					number[i] = '\0';
 				}
 			}
+			number[i]='\0';
 			game_stats->auto_move_sec = atoi(number);
 			draw_auto_move(*game_stats, 3);
 			draw_screen_border(window);
@@ -76,7 +77,7 @@ void enter_number(WINDOW *window, game_stats *game_stats)
 */
 void enter_name(WINDOW *window, game_stats *game_stats, char name[])
 {
-	int c, i = 0;
+	int c = '\0', i = 0;
 	int max_x, max_y;
 	//get size of the window
 	getmaxyx(stdscr, max_y, max_x);
@@ -147,7 +148,7 @@ int check_winner(int game[][5])
 
 	for (i = 0; i < 4; i++)
 		for (j = 0; j < 4; j++)
-			if (game[i][j] == 2048)
+			if (game[i][j] == 32)
 				return 1; // win
 
 	// continue game
@@ -192,6 +193,7 @@ void add_top_score(game_stats *game_stats, char name[])
 	i++;
 	game_stats->top_scores[i].score = game_stats->score;
 	game_stats->top_scores[i].time = game_stats->playing_time;
+	game_stats->top_scores[i].game_status = game_stats->game_status;
 
 	strcpy(game_stats->top_scores[i].player, name);
 }
@@ -502,7 +504,6 @@ void open_settings(WINDOW *window, game_stats *game_stats)
 	menu settings_menu;
 	settings_menu.option_count = 3;
 	strcpy(settings_menu.options[0], "Theme");
-	//strcpy(settings_menu.options[1], "Music");
 	strcpy(settings_menu.options[1], "Auto move");
 	strcpy(settings_menu.options[2], "Back");
 
@@ -588,8 +589,10 @@ int main()
 {
 	WINDOW *window = initscr();
 
-	if (init() == -1)
+	if (init() == -1) {
+		delwin(window);
 		return 0;
+	}
 
 	game_stats game_stats;
 	menu main_menu;
@@ -612,7 +615,9 @@ int main()
 	save_game(game_stats);
 	save_top_score(game_stats.top_scores);
 
-	delwin(window);
+	//delscreen(window);
+
 	endwin();
+	delwin(window);
 	return 0;
 }

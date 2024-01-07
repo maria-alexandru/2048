@@ -110,8 +110,15 @@ void upload_top_score(top_score top_scores[])
 	if (f == NULL) {
 		// if file does not exist, create it
 		f = fopen(SCORE_FILE, "wr");
-	}
-	if (fscanf(f, "%d", &top_scores[i].score) != EOF) {
+		fclose(f);
+		for (i = 0; i < SCORES; i++) {
+			top_scores[i].score = 0;
+			top_scores[i].time = 0;
+			top_scores[i].game_status = 0;
+			strcpy(top_scores[i].player, "-");
+		}
+		save_top_score(top_scores);
+	} else {
 		fclose(f);
 		f = fopen(SCORE_FILE, "r");
 		for (i = 0; i < SCORES; i++) {
@@ -121,15 +128,5 @@ void upload_top_score(top_score top_scores[])
 			fscanf(f, "%s", top_scores[i].player);
 		}
 		fclose(f);
-	} else {
-		// if file is empty, write it
-		fclose(f);
-		for (i = 0; i < SCORES; i++) {
-			top_scores[i].score = 0;
-			top_scores[i].time = 0;
-			top_scores[i].game_status = 0;
-			strcpy(top_scores[i].player, "-");
-		}
-		save_top_score(top_scores);
 	}
 }
