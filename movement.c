@@ -119,7 +119,7 @@ int move_left(int game[][MAX_DIM], int *score, int size)
 						game[i][p1] = 0;
 						game[i][j] = 0;
 						game[i][k] = aux2;
-						game[i][k+1] = aux1;
+						game[i][k + 1] = aux1;
 					}
 					k++;
 					j = k - 1;
@@ -182,7 +182,7 @@ int move_right(int game[][MAX_DIM], int *score, int size)
 						game[i][p1] = 0;
 						game[i][j] = 0;
 						game[i][k] = aux2;
-						game[i][k-1] = aux1;
+						game[i][k - 1] = aux1;
 					}
 					k--;
 					j = k + 1;
@@ -244,7 +244,7 @@ int move_up(int game[][MAX_DIM], int *score, int size)
 						game[p1][j] = 0;
 						game[i][j] = 0;
 						game[k][j] = aux2;
-						game[k+1][j] = aux1;
+						game[k + 1][j] = aux1;
 					}
 					k++;
 					i = k - 1;
@@ -306,7 +306,7 @@ int move_down(int game[][MAX_DIM], int *score, int size)
 						game[p1][j] = 0;
 						game[i][j] = 0;
 						game[k][j] = aux2;
-						game[k-1][j] = aux1;
+						game[k - 1][j] = aux1;
 					}
 					k--;
 					i = k + 1;

@@ -16,7 +16,7 @@ void draw_screen_border(WINDOW *window)
 	attron(COLOR_PAIR(2));
 	attron(A_STANDOUT);
 	// border
-	box(window, 0, 0); 
+	box(window, 0, 0);
 	attroff(A_STANDOUT);
 	attroff(COLOR_PAIR(2));
 	wrefresh(window);
@@ -43,9 +43,8 @@ void rectangle(int x, int y, int size_x, int size_y)
 void fill_rectangle(int x, int y, int size_x, int size_y)
 {
 	int i = x;
-	for (x; x < i + size_x; x++) {
+	for (x; x < i + size_x; x++)
 		mvvline(y, x, 0, size_y);
-	}
 }
 
 /*
@@ -80,7 +79,7 @@ void print_time_date(int x, int y)
 	char date[20], time_now[20];
 	struct tm *time_p;
 	// get time
-	time_t t = time(NULL); 
+	time_t t = time(NULL);
 	time_p = localtime(&t);
 	timestr(*time_p, time_now);
 	datestr(*time_p, date);

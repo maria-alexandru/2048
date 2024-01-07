@@ -77,7 +77,7 @@ char *datestr(struct tm t, char *date)
 }
 
 /*
-* Convert a number to a string and write it with a width of at least <format> 
+* Convert a number to a string and write it with a width of at least <format>
 * digits
 * Space is written in the front of the number if <format> is greater than the
 * number of digits of value

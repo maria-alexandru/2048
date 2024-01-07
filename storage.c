@@ -12,9 +12,9 @@ void save_game(app_info *app_info)
 	FILE *f;
 	f = fopen(GAME_FILE, "w");
 
-	if (f == NULL)
+	if (f == NULL) {
 		printf("Game file not found!");
-	else {
+	} else {
 		fprintf(f, "%d\n", app_info->theme_id);
 		fprintf(f, "%d\n", app_info->size);
 		fprintf(f, "%d\n", app_info->auto_move_sec);
@@ -132,41 +132,41 @@ void load_size_game(app_info *app_info, int size)
 /*
 * Load current top scores for the game with the desired size
 */
-void load_crt_tops(app_info *app_info, int size)
+void load_crt_tops(game_stats games[], game_stats *crt_game, int size)
 {
 	int i, k;
 	k = size;
 	for (i = 0; i < SCORES; i++) {
-		app_info->crt_game.top_scores[i].score = app_info->games[k].top_scores[i].score;
-		app_info->crt_game.top_scores[i].time = app_info->games[k].top_scores[i].time;
-		app_info->crt_game.top_scores[i].game_status = app_info->games[k].top_scores[i].game_status;
-		strcpy(app_info->crt_game.top_scores[i].player, app_info->games[k].top_scores[i].player);
+		crt_game->top_scores[i].score = games[k].top_scores[i].score;
+		crt_game->top_scores[i].time = games[k].top_scores[i].time;
+		crt_game->top_scores[i].game_status = games[k].top_scores[i].game_status;
+		strcpy(crt_game->top_scores[i].player, games[k].top_scores[i].player);
 	}
 }
 
 /*
 * Save top scores in the SCORE_FILE file
 */
-void save_top_score(app_info *app_info)
+void save_top_score(game_stats *games, game_stats crt_game, int size)
 {
 	int i, k;
 	FILE *f;
 	f = fopen(SCORE_FILE, "w");
 	if (f != NULL) {
-		k = app_info->size;
+		k = size;
 		for (i = 0; i < SCORES; i++) {
-			app_info->games[k].top_scores[i].score = app_info->crt_game.top_scores[i].score;
-			app_info->games[k].top_scores[i].time = app_info->crt_game.top_scores[i].time;
-			app_info->games[k].top_scores[i].game_status = app_info->crt_game.top_scores[i].game_status;
-			strcpy(app_info->games[k].top_scores[i].player, app_info->crt_game.top_scores[i].player);
+			games[k].top_scores[i].score = crt_game.top_scores[i].score;
+			games[k].top_scores[i].time = crt_game.top_scores[i].time;
+			games[k].top_scores[i].game_status = crt_game.top_scores[i].game_status;
+			strcpy(games[k].top_scores[i].player, crt_game.top_scores[i].player);
 		}
 
 		for (k = 3; k < MAX_DIM; k++) {
 			for (i = 0; i < SCORES; i++) {
-				fprintf(f, "%d\n", app_info->games[k].top_scores[i].score);
-				fprintf(f, "%d\n", app_info->games[k].top_scores[i].time);
-				fprintf(f, "%d\n", app_info->games[k].top_scores[i].game_status);
-				fprintf(f, "%s\n", app_info->games[k].top_scores[i].player);
+				fprintf(f, "%d\n", games[k].top_scores[i].score);
+				fprintf(f, "%d\n", games[k].top_scores[i].time);
+				fprintf(f, "%d\n", games[k].top_scores[i].game_status);
+				fprintf(f, "%s\n", games[k].top_scores[i].player);
 			}
 		}
 		fclose(f);
@@ -196,8 +196,8 @@ void upload_top_score(app_info *app_info)
 				strcpy(app_info->games[k].top_scores[i].player, "-");
 			}
 		}
-		load_crt_tops(app_info, app_info->size);
-		save_top_score(app_info);
+		load_crt_tops(app_info->games, &app_info->crt_game, app_info->size);
+		save_top_score(app_info->games, app_info->crt_game, app_info->size);
 	} else {
 		fclose(f);
 		f = fopen(SCORE_FILE, "r");
@@ -209,7 +209,7 @@ void upload_top_score(app_info *app_info)
 				fscanf(f, "%s", app_info->games[k].top_scores[i].player);
 			}
 		}
-		load_crt_tops(app_info, app_info->size);
+		load_crt_tops(app_info->games, &app_info->crt_game, app_info->size);
 		fclose(f);
 	}
 }
