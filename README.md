@@ -8,6 +8,7 @@ in the game are visible.
 ## How to play
 
 1. **Start screen:**
+	- Firstly the 2048 logo will appear. Press ENTER to continue.
 	- The main menu will show up and you can navigate through the options using
 the UP arrow key and the DOWN arrow key. Press ENTER to select an option.
 	- The first option is the game mode. You can change it by pressing the RIGHT
@@ -29,8 +30,8 @@ for all game modes.
 
 2. **Gameplay**
 	- When a new game is started, the player can move all the tiles to the left
-by pressing the LEFT arrow key, to the right by pressing the RIGHT arrow key, up by
-pressing the UP arrow key or down by pressing the DOWN arrow key.
+by pressing the LEFT arrow key, to the right by pressing the RIGHT arrow key, up
+by pressing the UP arrow key or down by pressing the DOWN arrow key.
 	- If two adjacent tiles have the same value and are moved in the same
 direction, they merge into a single tile which has the value 2 times higher than
 the initial one.
@@ -52,8 +53,8 @@ loss and a corresponding message is displayed.
 	- When a game ends, if the score is a top score or a high score, a message
 will appear on the screen and the player will have to enter their name in order
 to save it.
-	- A score is considered a top score if it is in the top eight scores or if it
-is equal to one of them and has a shorter time.
+	- A score is considered a top score if it is in the top eight scores or if 
+it is equal to one of them and has a shorter time.
 	- A score is considered a high score if it is the highest score reached from
 the first time the app was opened or if it is equal to the last high score and
 was achieved in a shorter time.

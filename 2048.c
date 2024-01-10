@@ -296,7 +296,7 @@ void execute_commmand(int key, app_info *app_info, WINDOW *window)
 {
 	int game_aux[MAX_DIM][MAX_DIM];
 	int score_aux;
-	// copy the game matrix and the score
+	// copy the game matrix and the score in an auxiliary variable
 	if (key != 'U' && key >= KEY_DOWN && key <= KEY_RIGHT) {
 		copy_info(app_info->crt_game.game, game_aux, app_info->size);
 		score_aux = app_info->crt_game.score;
@@ -321,6 +321,8 @@ void execute_commmand(int key, app_info *app_info, WINDOW *window)
 		app_info->crt_game.score = app_info->crt_game.old_score;
 		draw_game(window, app_info->crt_game.game, app_info->size);
 	}
+	// if the move was valid, copy copy the game matrix and the score from the
+	// auxiliary variable
 	if (key != 'U' && valid == 1) {
 		copy_info(game_aux, app_info->crt_game.old_game, app_info->size);
 		app_info->crt_game.old_score = score_aux;
@@ -635,6 +637,28 @@ void open_main_menu(WINDOW *window, app_info *app_info, menu main_menu,
 	}
 }
 
+/*
+* Draw the start page which contains the 2048 logo
+*/
+void start_page(WINDOW *window)
+{
+	int key;
+	int max_x, max_y;
+	getmaxyx(stdscr, max_y, max_x);
+	draw_logo(window);
+	nodelay(window, TRUE);
+	while (1) {
+		if(resize(&max_x, &max_y) == 1) {
+			draw_logo(window);
+		}
+		key = getch();
+		if (key == '\n')
+			break;
+	}
+	nodelay(window, FALSE);
+	clear();
+}
+
 int main(void)
 {
 	WINDOW *window = initscr();
@@ -666,6 +690,8 @@ int main(void)
 	upload_top_score(&app_info);
 	app_info.theme_count = read_themes(app_info.themes);
 	set_theme(app_info.themes[app_info.theme_id]);
+
+	start_page(window);
 	open_main_menu(window, &app_info, main_menu, size_menu);
 	save_game(&app_info);
 	save_top_score(app_info.games, app_info.crt_game, app_info.size);

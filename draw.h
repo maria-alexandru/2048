@@ -9,6 +9,8 @@
 #include "theme.h"
 #include "utils.h"
 
+void draw_logo(WINDOW *window);
+
 void draw_screen_border(WINDOW *window);
 
 void rectangle(int x, int y, int size_x, int size_y);

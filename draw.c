@@ -9,6 +9,36 @@
 #define NOT_SELECTED_C 19
 
 /*
+* Draw 2048 as ASCII art
+*/
+void draw_logo(WINDOW *window)
+{
+	clear();
+	init_pair(5, COLOR_BLUE, COLOR_WHITE);
+	attron(COLOR_PAIR(5));
+	FILE *f = fopen("2048.txt", "r");
+	int i, key;
+	int x, y, max_x, max_y;
+	char draw[11][100];
+	char text[30] = "Press ENTER to continue";
+	getmaxyx(stdscr, max_y, max_x);
+	x = max_x / 2 - 80 / 2;
+	y = max_y / 2 - 14/ 2;
+	if (x < 5)
+		x = 5;
+	if (y < 5)
+		y = 5;
+	for (i = 0; i < 9; i++) {
+		fgets(draw[i], 100, f);
+		mvaddstr(y + i, x, draw[i]);
+	}
+	mvaddstr(y + i + 4, max_x / 2 - strlen(text) / 2, text);
+	fclose(f);
+	draw_screen_border(window);
+	refresh();
+}
+
+/*
 * Draw the screen border
 */
 void draw_screen_border(WINDOW *window)
