@@ -3,7 +3,7 @@
 /*
 * Read colors from colors.txt and assign them to the themes variable
 */
-int read_themes(theme themes[])
+int read_themes(theme_info themes[])
 {
 	FILE *f;
 	int i;
@@ -39,7 +39,7 @@ int read_themes(theme themes[])
 /*
 * Create the colors for each theme
 */
-void initialize_colors(theme theme)
+void initialize_colors(theme_info theme)
 {
 	int i;
 	// create colors
@@ -48,8 +48,8 @@ void initialize_colors(theme theme)
 				   theme.color[i].b);
 		init_pair(theme.color[i].id, COLOR_BLUE, theme.color[i].id);
 	}
-	init_color(12, 700, 700, 850);   // light blue // not selected
-	init_color(11, 520, 600, 960);   // dark blue // selected
+	init_color(12, 700, 700, 850); // light blue // not selected
+	init_color(11, 520, 600, 960); // dark blue // selected
 	init_pair(11, 11, 11); // selected
 	init_pair(12, 12, 12); // not selected
 	init_pair(10, COLOR_BLUE, 12); // selected text
@@ -59,7 +59,7 @@ void initialize_colors(theme theme)
 /*
 * Set a given theme
 */
-void set_theme(theme theme)
+void set_theme(theme_info theme)
 {
 	int i;
 	init_color(18, theme.color[1].r, theme.color[1].g, theme.color[1].b);

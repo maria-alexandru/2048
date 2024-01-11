@@ -18,23 +18,24 @@ void rectangle(int x, int y, int size_x, int size_y);
 
 void fill_rectangle(int x, int y, int size_x, int size_y);
 
-void print_valid_input(int x, int y, app_info app_info);//void print_valid_input(int high_score, int high_score_time);
+void print_valid_input(int x, int y, app_info app);
 
 void print_time_date(int x, int y);
 
-void print_high_score(game_stats game_stats, int x, int y);
+void print_high_score(game_stats_info game_stats, int x, int y);
 
-void print_score_time(game_stats game_stats, int x, int y);
+void print_score_time(game_stats_info game_stats, int x, int y);
 
-void info_panel(app_info app_info);//void info_panel(game_stats game_stats, int status);
+void info_panel(app_info app);
 
-void draw_menu(WINDOW *window, menu main_menu, int selected);
+void draw_menu(WINDOW *window, menu_info main_menu, int selected);
 
-void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int selected);
+void draw_theme_menu(WINDOW *window, theme_info themes[], int theme_count,
+					 int selected);
 
 void draw_game(WINDOW *window, int game[][MAX_DIM], int size);
 
-void draw_hs_message(game_stats *game_stats, char name[], int size);
+void draw_hs_message(game_stats_info *game_stats, char name[], int size);
 
 void draw_end_game(int game_status, int size);
 
