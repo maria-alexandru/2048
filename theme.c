@@ -10,7 +10,7 @@ int read_themes(theme themes[])
 	int color_id_start = 31;
 	int count = 0;
 	f = fopen("colors.txt", "r");
-	if (f == NULL) {
+	if (!f) {
 		printf("Color file not found!");
 	} else {
 		while (!feof(f)) {
@@ -70,7 +70,8 @@ void set_theme(theme theme)
 	init_pair(4, COLOR_BLUE, 18);
 	init_pair(19, COLOR_BLUE, 19); // text color
 	for (i = 0; i < 11; i++) {
-		init_color(20 + i, theme.color[i].r, theme.color[i].g, theme.color[i].b);
+		init_color(20 + i, theme.color[i].r, theme.color[i].g,
+				   theme.color[i].b);
 		init_pair(20 + i, COLOR_BLUE, theme.color[i].id);
 	}
 }

@@ -16,7 +16,7 @@ typedef struct {
     int score;
     int time;
     char player[20];
-	int game_status;
+	int status;
 }top_score;
 
 typedef struct{
@@ -27,8 +27,8 @@ typedef struct{
 
 typedef struct{
     int game[MAX_DIM][MAX_DIM];
-    int game_in_progress; // 0 or 1
-	int game_status; // 0 for game in progress, 1 for win, -1 for loss
+    int in_progress; // 0 or 1
+	int status; // 0 for game in progress, 1 for win, -1 for loss
 	int score;
 	int playing_time; // in seconds
 	int high_score;

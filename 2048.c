@@ -9,7 +9,7 @@
 #include "theme.h"
 #include "storage.h"
 
-void start_game(WINDOW *window, app_info *app_info);
+void start_game(WINDOW * window, app_info * app_info);
 void reset_game(app_info *app_info);
 
 int init(void)
@@ -92,7 +92,7 @@ void enter_name(WINDOW *window, app_info *app_info, char name[])
 	while (c != '\n') {
 		if (resize(&max_x, &max_y) == 1) {
 			draw_game(window, app_info->crt_game.game, app_info->size);
-			draw_end_game(app_info->crt_game.game_status, app_info->size);
+			draw_end_game(app_info->crt_game.status, app_info->size);
 			draw_hs_message(&app_info->crt_game, name, app_info->size);
 			draw_screen_border(window);
 		}
@@ -208,7 +208,7 @@ void add_top_score(game_stats *crt_game, char name[])
 	i++;
 	crt_game->top_scores[i].score = crt_game->score;
 	crt_game->top_scores[i].time = crt_game->playing_time;
-	crt_game->top_scores[i].game_status = crt_game->game_status;
+	crt_game->top_scores[i].status = crt_game->status;
 
 	strcpy(crt_game->top_scores[i].player, name);
 }
@@ -243,10 +243,10 @@ void end_game(WINDOW *window, app_info *app_info)
 	int new_high_score = 0, new_top_score = 0;
 	char name[20] = "";
 
-	if (app_info->crt_game.game_status != 0) {
+	if (app_info->crt_game.status != 0) {
 		clear();
 		draw_game(window, app_info->crt_game.game, app_info->size);
-		draw_end_game(app_info->crt_game.game_status, app_info->size);
+		draw_end_game(app_info->crt_game.status, app_info->size);
 		new_high_score = update_high_score(&app_info->crt_game);
 		new_top_score = is_top_score(app_info->crt_game);
 		if (new_high_score == 1 || new_top_score == 1) {
@@ -258,20 +258,20 @@ void end_game(WINDOW *window, app_info *app_info)
 
 			clear();
 			draw_game(window, app_info->crt_game.game, app_info->size);
-			draw_end_game(app_info->crt_game.game_status, app_info->size);
+			draw_end_game(app_info->crt_game.status, app_info->size);
 			new_high_score = 0;
 			save_game(app_info);
-			save_top_score(app_info->games, app_info->crt_game, app_info->size);
+			save_top_score(app_info);
 		}
 		nodelay(stdscr, TRUE);
 		// wait until Q is pressed to exit
 		while (1) {
 			if (resize(&max_x, &max_y) == 1) { // terminal window was resized
-				info_panel(app_info->crt_game, app_info->crt_game.game_status);
+				info_panel(*app_info);
 				draw_game(window, app_info->crt_game.game, app_info->size);
-				draw_end_game(app_info->crt_game.game_status, app_info->size);
+				draw_end_game(app_info->crt_game.status, app_info->size);
 			}
-			info_panel(app_info->crt_game, app_info->crt_game.game_status);
+			info_panel(*app_info);
 			draw_screen_border(window);
 			key = getch();
 			if (key == 'Q')
@@ -321,7 +321,7 @@ void execute_commmand(int key, app_info *app_info, WINDOW *window)
 		app_info->crt_game.score = app_info->crt_game.old_score;
 		draw_game(window, app_info->crt_game.game, app_info->size);
 	}
-	// if the move was valid, copy copy the game matrix and the score from the
+	// if the move was valid, copy the game matrix and the score from the
 	// auxiliary variable
 	if (key != 'U' && valid == 1) {
 		copy_info(game_aux, app_info->crt_game.old_game, app_info->size);
@@ -354,8 +354,8 @@ void start_game(WINDOW *window, app_info *app_info)
 	int diff_time;
 
 	// a new game was started
-	if (app_info->crt_game.game_in_progress == 0) {
-		app_info->crt_game.game_in_progress = 1;
+	if (app_info->crt_game.in_progress == 0) {
+		app_info->crt_game.in_progress = 1;
 		generate_rand_tile(app_info->crt_game.game, app_info->size);
 		generate_rand_tile(app_info->crt_game.game, app_info->size);
 		copy_info(app_info->crt_game.game, app_info->crt_game.old_game,
@@ -370,20 +370,20 @@ void start_game(WINDOW *window, app_info *app_info)
 	while (1) {
 		if (resize(&max_x, &max_y) == 1) {
 			// terminal window was resized
-			info_panel(app_info->crt_game, app_info->crt_game.game_status);
+			info_panel(*app_info);
 			draw_game(window, app_info->crt_game.game, app_info->size);
 		}
 
-		app_info->crt_game.game_status = check_winner(app_info->crt_game.game,
-													  app_info->size);
-		if (app_info->crt_game.game_status == 1 ||
-			app_info->crt_game.game_status == -1)
+		app_info->crt_game.status = check_winner(app_info->crt_game.game,
+												 app_info->size);
+		if (app_info->crt_game.status == 1 ||
+			app_info->crt_game.status == -1)
 			break;
 
 		crt_time = time(NULL);
 		diff_time = (int)difftime(crt_time, start_time);
 		app_info->crt_game.playing_time = playing_time_aux + diff_time;
-		info_panel(app_info->crt_game, app_info->crt_game.game_status);
+		info_panel(*app_info);
 		draw_screen_border(window);
 		key = getch();
 
@@ -400,7 +400,7 @@ void start_game(WINDOW *window, app_info *app_info)
 		}
 	}
 	nodelay(stdscr, FALSE);
-	if (app_info->crt_game.game_status != 0)
+	if (app_info->crt_game.status != 0)
 		end_game(window, app_info);
 }
 
@@ -410,7 +410,7 @@ void start_game(WINDOW *window, app_info *app_info)
 void reset_game(app_info *app_info)
 {
 	int i, j;
-	app_info->crt_game.game_in_progress = 0;
+	app_info->crt_game.in_progress = 0;
 	app_info->crt_game.playing_time = 0;
 	app_info->crt_game.score = 0;
 	for (i = 0; i < app_info->size; i++)
@@ -556,7 +556,7 @@ void open_settings(WINDOW *window, app_info *app_info)
 				open_theme_menu(window, app_info->themes, app_info->theme_count,
 								&app_info->theme_id);
 				save_game(app_info);
-			} else if (strcmp(settings_menu.options[selected], "Auto move") == 0) {
+			} else if (!strcmp(settings_menu.options[selected], "Auto move")) {
 				open_auto_move(window, app_info);
 			} else if (strcmp(settings_menu.options[selected], "Back") == 0) {
 				break;
@@ -589,7 +589,7 @@ void open_main_menu(WINDOW *window, app_info *app_info, menu main_menu,
 		if (key == KEY_UP && selected > 0)
 			selected--;
 		if (strcmp(main_menu.options[selected], "Resume") == 0) {
-			if (app_info->crt_game.game_in_progress == 0) {
+			if (app_info->crt_game.in_progress == 0) {
 				if (key == KEY_DOWN)
 					selected++;
 				else if (key == KEY_UP)
@@ -602,14 +602,15 @@ void open_main_menu(WINDOW *window, app_info *app_info, menu main_menu,
 				selected_size--;
 				strcpy(main_menu.options[0], size_menu.options[selected_size]);
 				load_size_game(app_info, size_menu.selected + 3);
-				load_crt_tops(app_info->games, &app_info->crt_game, app_info->size);
+				load_crt_tops(app_info);
 			}
-			if (key == KEY_RIGHT && selected_size < size_menu.option_count - 1) {
+			if (key == KEY_RIGHT &&
+				selected_size < size_menu.option_count - 1) {
 				size_menu.selected++;
 				selected_size++;
 				strcpy(main_menu.options[0], size_menu.options[selected_size]);
 				load_size_game(app_info, size_menu.selected + 3);
-				load_crt_tops(app_info->games, &app_info->crt_game, app_info->size);
+				load_crt_tops(app_info);
 			}
 		}
 		// enter is pressed
@@ -622,9 +623,9 @@ void open_main_menu(WINDOW *window, app_info *app_info, menu main_menu,
 				reset_game(app_info);
 				start_game(window, app_info);
 			} else if (strcmp(main_menu.options[selected], "Resume") == 0) {
-				if (app_info->crt_game.game_in_progress == 1) {
+				if (app_info->crt_game.in_progress == 1) {
 					move(0, 0);
-					app_info->crt_game.game_in_progress = 1;
+					app_info->crt_game.in_progress = 1;
 					start_game(window, app_info);
 				}
 			} else if (strcmp(main_menu.options[selected], "Top Scores") == 0) {
@@ -648,9 +649,8 @@ void start_page(WINDOW *window)
 	draw_logo(window);
 	nodelay(window, TRUE);
 	while (1) {
-		if(resize(&max_x, &max_y) == 1) {
+		if (resize(&max_x, &max_y) == 1)
 			draw_logo(window);
-		}
 		key = getch();
 		if (key == '\n')
 			break;
@@ -685,7 +685,8 @@ int main(void)
 	upload_game(&app_info);
 	size_menu.selected = app_info.size - 3;
 	strcpy(main_menu.options[0], size_menu.options[size_menu.selected]);
-	copy_info(app_info.crt_game.game, app_info.crt_game.old_game, app_info.size);
+	copy_info(app_info.crt_game.game, app_info.crt_game.old_game,
+			  app_info.size);
 	app_info.crt_game.old_score = app_info.crt_game.score;
 	upload_top_score(&app_info);
 	app_info.theme_count = read_themes(app_info.themes);
@@ -694,7 +695,7 @@ int main(void)
 	start_page(window);
 	open_main_menu(window, &app_info, main_menu, size_menu);
 	save_game(&app_info);
-	save_top_score(app_info.games, app_info.crt_game, app_info.size);
+	save_top_score(&app_info);
 
 	delwin(window);
 	endwin();

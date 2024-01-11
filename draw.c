@@ -9,7 +9,7 @@
 #define NOT_SELECTED_C 19
 
 /*
-* Draw 2048 as ASCII art
+* Draw 2048 logo as ASCII art
 */
 void draw_logo(WINDOW *window)
 {
@@ -23,7 +23,7 @@ void draw_logo(WINDOW *window)
 	char text[30] = "Press ENTER to continue";
 	getmaxyx(stdscr, max_y, max_x);
 	x = max_x / 2 - 80 / 2;
-	y = max_y / 2 - 14/ 2;
+	y = max_y / 2 - 14 / 2;
 	if (x < 5)
 		x = 5;
 	if (y < 5)
@@ -80,22 +80,36 @@ void fill_rectangle(int x, int y, int size_x, int size_y)
 /*
 * Print valid input commands during the game
 */
-void print_valid_input(int x, int y)
+void print_valid_input(int x, int y, app_info app_info)// game_stats)
 {
+	int game_aux[MAX_DIM][MAX_DIM], score_aux = 0;
 	mvaddstr(y, x, "Valid input: ");
 	y++;
-	mvaddch(y, x, ACS_UARROW);
-	mvaddstr(y, x + 1, " - move up");
-	y++;
-	mvaddch(y, x, ACS_DARROW);
-	mvaddstr(y, x + 1, " - move down");
-	y++;
-	mvaddch(y, x, ACS_LARROW);
-	mvaddstr(y, x + 1, " - move left");
-	y++;
-	mvaddch(y, x, ACS_RARROW);
-	mvaddstr(y, x + 1, " - move right");
-	y++;
+	attron(COLOR_PAIR(TEXT_COLOR));
+	copy_info(app_info.crt_game.game, game_aux, app_info.size);
+	if (move_up(game_aux, &score_aux, app_info.size) == 1) {
+		mvaddch(y, x, ACS_UARROW);
+		mvaddstr(y, x + 1, " - move up");
+		y++;
+		copy_info(app_info.crt_game.game, game_aux, app_info.size);
+	}
+	if (move_down(game_aux, &score_aux, app_info.size) == 1) {
+		mvaddch(y, x, ACS_DARROW);
+		mvaddstr(y, x + 1, " - move down");
+		y++;
+		copy_info(app_info.crt_game.game, game_aux, app_info.size);
+	}
+	if (move_left(game_aux, &score_aux, app_info.size) == 1) {
+		mvaddch(y, x, ACS_LARROW);
+		mvaddstr(y, x + 1, " - move left");
+		y++;
+		copy_info(app_info.crt_game.game, game_aux, app_info.size);
+	}
+	if (move_right(game_aux, &score_aux, app_info.size) == 1) {
+		mvaddch(y, x, ACS_RARROW);
+		mvaddstr(y, x + 1, " - move right");
+		y++;
+	}
 	mvaddstr(y, x, "Q - quit");
 	y++;
 	mvaddstr(y, x, "U - undo");
@@ -152,7 +166,7 @@ void print_score_time(game_stats game_stats, int x, int y)
 /*
 * Draw the info panel and print the information
 */
-void info_panel(game_stats game_stats, int status)
+void info_panel(app_info app_info)//(game_stats game_stats, int status)
 {
 	int x, y, size_x, size_y;
 	getmaxyx(stdscr, size_y, size_x);
@@ -170,20 +184,20 @@ void info_panel(game_stats game_stats, int status)
 	print_time_date(x, y);
 	y += 3;
 	 // print score and playing time
-	print_score_time(game_stats, x, y);
+	print_score_time(app_info.crt_game, x, y);
 	y += 3;
 	// print high score info
-	print_high_score(game_stats, x, y);
+	print_high_score(app_info.crt_game, x, y);
 	y += 6;
 
 	// if game is not over, print valid commands
-	if (status == 0)
-		print_valid_input(x, y);
-	else if (status == -1)
+	if (app_info.crt_game.status == 0)
+		print_valid_input(x, y, app_info);
+	else if (app_info.crt_game.status == -1)
 		mvaddstr(y, x, "Game over!");
-	else if (status == 1)
+	else if (app_info.crt_game.status == 1)
 		mvaddstr(y, x, "You won!");
-	if (status == 1 || status == -1) {
+	if (app_info.crt_game.status == 1 || app_info.crt_game.status == -1) {
 		y++;
 		mvaddstr(y, x, "Press Q to exit");
 		y++;
@@ -286,7 +300,8 @@ void draw_menu(WINDOW *window, menu menu, int selected)
 /*
 * Draw theme menu, coloring the tiles for every theme
 */
-void draw_theme_menu(WINDOW *window, theme themes[], int theme_count, int selected)
+void draw_theme_menu(WINDOW *window, theme themes[], int theme_count,
+					 int selected)
 {
 	clear();
 	int x = 10, y = 10, start_x = 3, start_y = 3;
@@ -389,7 +404,7 @@ void draw_hs_message(game_stats *game_stats, char name[], int size)
 /*
 * Draw 'Game over!' or 'You won!' message
 */
-void draw_end_game(int game_status, int size)
+void draw_end_game(int status, int size)
 {
 	int max_x, max_y;
 	int cursor_pos_x, cursor_pos_y;
@@ -397,7 +412,7 @@ void draw_end_game(int game_status, int size)
 	int layout_size = size * tile_size;
 	int length;
 	char message[40];
-	if (game_status == -1)
+	if (status == -1)
 		strcpy(message, " Game over! ");
 	else
 		strcpy(message, " You won! ");
@@ -474,9 +489,9 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 		rectangle(x, y, columns * len, 2);
 		y++;
 
-		if (top_scores[k].game_status == 0)
+		if (top_scores[k].status == 0)
 			strcpy(win_loss, " ");
-		else if (top_scores[k].game_status == 1)
+		else if (top_scores[k].status == 1)
 			strcpy(win_loss, "Win");
 		else
 			strcpy(win_loss, "Loss");
@@ -501,7 +516,6 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 		mvaddstr(y, x + 2 * len, name);
 		mvaddstr(y, x + 3 * len, win_loss);
 	}
-
 	draw_screen_border(window);
 	refresh();
 }
@@ -511,17 +525,13 @@ void draw_top_scores(WINDOW *window, top_score top_scores[])
 */
 void draw_auto_move(int auto_move_sec, int selected)
 {
-	int max_x, max_y;
-	int x, y;
+	int max_x, max_y, x, y, len;
 	char number[10] = "", message[100] = "";
-	int len;
 
 	clear();
 	getmaxyx(stdscr, max_y, max_x);
-	y = max_y / 5;
-	x = max_x / 2 - 16;
+	y = max_y / 5; x = max_x / 2 - 16;
 	move(y, x);
-
 	attron(COLOR_PAIR(2));
 	fill_rectangle(x, y, 32, 6);
 	attron(COLOR_PAIR(4));
@@ -531,13 +541,11 @@ void draw_auto_move(int auto_move_sec, int selected)
 	mvaddstr(y + 3, x + 1, "  move  automatically for you  ");
 	mvaddstr(y + 4, x + 1, "                               ");
 	len = strlen("                               ");
-
 	y += 4;
 	if (auto_move_sec == -1 || auto_move_sec == 0) {
 		strcpy(message, "Auto move is off");
 		center_text(message, len);
 		mvaddstr(y + 1, x + 1, message);
-
 	} else {
 		int_to_string(number, auto_move_sec, 0);
 		strcpy(message, "Auto move is on, ");
@@ -547,7 +555,6 @@ void draw_auto_move(int auto_move_sec, int selected)
 		mvaddstr(y + 1, x + 1, message);
 	}
 	attron(COLOR_PAIR(TEXT_COLOR));
-
 	y += 4;	x += 9;
 	if (selected == -1)
 		attron(A_STANDOUT);
@@ -579,7 +586,6 @@ void draw_auto_move(int auto_move_sec, int selected)
 	rectangle(x, y, 14, 2);
 	mvaddstr(y + 1, x + 1, " Change time ");
 	attroff(A_STANDOUT);
-
 	if (selected == 3) {
 		y += 8; x -= 4;
 		attron(COLOR_PAIR(2));

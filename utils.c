@@ -93,7 +93,9 @@ void int_to_string(char *s, int val, int format)
 	if (count <= format) {
 		for (i = 0; i < format; i++)
 			s[i] = ' ';
-		for (i = (format - count) / 2 + count - 1; i >= (format - count) / 2; i--) {
+
+		for (i = (format - count) / 2 + count - 1; i >= (format - count) / 2;
+			 i--) {
 			s[i] = val % 10 + '0';
 			val = val / 10;
 		}

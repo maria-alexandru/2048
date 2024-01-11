@@ -80,6 +80,7 @@ int auto_move(int game[][MAX_DIM], int size)
 * If more than one tile is found, combine the first two values in the row,
 * then the next two if they exist and then move all tiles to
 * the left
+* @return 1 if the move is valid, 0 if not
 */
 int move_left(int game[][MAX_DIM], int *score, int size)
 {
@@ -143,6 +144,7 @@ int move_left(int game[][MAX_DIM], int *score, int size)
 * If more than one tile is found, combine the last two values in the row,
 * then the next two if they exist and then move all tiles to
 * the right
+* @return 1 if the move is valid, 0 if not
 */
 int move_right(int game[][MAX_DIM], int *score, int size)
 {
@@ -205,6 +207,7 @@ int move_right(int game[][MAX_DIM], int *score, int size)
 * If only a tile is found, move it on the first position in the column
 * If more than one tile is found, combine the first two values on the column,
 * then the next two if they exist and then move all tiles up
+* @return 1 if the move is valid, 0 if not
 */
 int move_up(int game[][MAX_DIM], int *score, int size)
 {
@@ -267,6 +270,7 @@ int move_up(int game[][MAX_DIM], int *score, int size)
 * If only a tile is found, move it on the last position in the column
 * If more than one tile is found, combine the last two values on the column,
 * then the next two if they exist and then move all tiles down
+* @return 1 if the move is valid, 0 if not
 */
 int move_down(int game[][MAX_DIM], int *score, int size)
 {
