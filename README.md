@@ -39,7 +39,7 @@ for all game modes.
 
 2. **Gameplay**
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500" class="center">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/320dd140-6ed5-400f-a820-0e01be752b8c" alt="2048" width="500" class="center">
 </p>
  	-  When a new game is started, the player can move all the tiles to the left
 by pressing the LEFT arrow key, to the right by pressing the RIGHT arrow key, up
