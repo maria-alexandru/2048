@@ -1,6 +1,7 @@
 # 2048
-
-![image](https://github.com/maria-alexandru/2048/assets/149622435/c5c46e14-5909-4ef1-828d-257a205222d0)
+<p>
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/c5c46e14-5909-4ef1-828d-257a205222d0" alt="2048" width="500">
+</p>
 
 - Name: Alexandru Maria-Mihaela
 - The terminal window should be in its maximized state so that all the options
