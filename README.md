@@ -1,6 +1,6 @@
 # 2048
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/c5c46e14-5909-4ef1-828d-257a205222d0" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/c5c46e14-5909-4ef1-828d-257a205222d0" alt="2048" width="500" class="center">
 </p>
 
 - Name: Alexandru Maria-Mihaela
@@ -14,7 +14,7 @@ in the game are visible.
 	- The main menu will show up and you can navigate through the options using
 the UP arrow key and the DOWN arrow key. Press ENTER to select an option.
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500" class="center">
 </p>
 	- The first option is the game mode. You can change it by pressing the RIGHT
 arrow key or the LEFT arrow key. The existing modes are Small (3x3), Classic
@@ -29,7 +29,7 @@ eight scores, the time in which each was achieved, the name of the player who
 achieved it and if it was a win or a loss.
 
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500" class="center">
 </p>
 	- If you enter the settings submenu, you will be able to modify the
 appearance of the game by choosing the desired theme, you can configure the
@@ -39,7 +39,7 @@ for all game modes.
 
 2. **Gameplay**
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500" class="center">
 </p>
  	-  When a new game is started, the player can move all the tiles to the left
 by pressing the LEFT arrow key, to the right by pressing the RIGHT arrow key, up
@@ -67,7 +67,7 @@ will appear on the screen and the player will have to enter their name in order
 to save it.
 
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/3e5c7f0c-88a2-4728-821d-6616af97ce18" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/3e5c7f0c-88a2-4728-821d-6616af97ce18" alt="2048" width="500" class="center">
 </p>
 	- A score is considered a top score if it is in the top eight scores or if 
 it is equal to one of them and has a shorter time.
@@ -82,7 +82,7 @@ was achieved in a shorter time.
 can select one by pressing ENTER.
 
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/dc6cc449-aae9-44fc-9ea3-9e7fe6119ec8" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/dc6cc449-aae9-44fc-9ea3-9e7fe6119ec8" alt="2048" width="500" class="center">
 </p>
 
 5. **Automatic move option**
@@ -91,7 +91,7 @@ can select one by pressing ENTER.
 inactivity after which the game will move automatically.
 
 <p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/98250b98-679a-4c35-ba85-b6045ca6d217" alt="2048" width="500">
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/98250b98-679a-4c35-ba85-b6045ca6d217" alt="2048" width="500" class="center">
 </p>
 
 ## Implementation
