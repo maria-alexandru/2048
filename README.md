@@ -13,9 +13,7 @@ in the game are visible.
 	- Firstly the 2048 logo will appear. Press ENTER to continue.
 	- The main menu will show up and you can navigate through the options using
 the UP arrow key and the DOWN arrow key. Press ENTER to select an option.
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500" class="center">
-</p>
+	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/9a78ee3d-28d5-4fe7-a356-08e3bb7cd8c8" alt="2048" width="500" class="center"> </p>
 	- The first option is the game mode. You can change it by pressing the RIGHT
 arrow key or the LEFT arrow key. The existing modes are Small (3x3), Classic
 (4x4) and Big (5x5). The 'New Game', 'Resume' and 'Top Scores' options refer to
@@ -34,9 +32,7 @@ for all game modes.
 	- If you select the 'Quit' option, the game will immediately close.
 
 2. **Gameplay**
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/320dd140-6ed5-400f-a820-0e01be752b8c" alt="2048" width="500" class="center">
-</p>
+	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/320dd140-6ed5-400f-a820-0e01be752b8c" alt="2048" width="500" class="center"> </p>
  	-  When a new game is started, the player can move all the tiles to the left
 by pressing the LEFT arrow key, to the right by pressing the RIGHT arrow key, up
 by pressing the UP arrow key or down by pressing the DOWN arrow key.
@@ -61,39 +57,27 @@ loss and a corresponding message is displayed.
 	- When a game ends, if the score is a top score or a high score, a message
 will appear on the screen and the player will have to enter their name in order
 to save it.
-
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/3e5c7f0c-88a2-4728-821d-6616af97ce18" alt="2048" width="500" class="center">
-</p>
+	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/3e5c7f0c-88a2-4728-821d-6616af97ce18" alt="2048" width="500" class="center"> </p>
 	- A score is considered a top score if it is in the top eight scores or if 
 it is equal to one of them and has a shorter time.
 	- A score is considered a high score if it is the highest score reached from
 the first time the app was opened or if it is equal to the last high score and
 was achieved in a shorter time.
 	- Each game mode has different high/top scores.
- 
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500" class="center">
-</p>
+ 	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500" class="center"> </p>
 
 4. **Theme color menu**
 	- The player has five options to choose from for the appearance of the game.
 	- You can navigate through the themes by pressing the UP/DOWN arrow and you
 can select one by pressing ENTER.
-
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/dc6cc449-aae9-44fc-9ea3-9e7fe6119ec8" alt="2048" width="500" class="center">
-</p>
+	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/dc6cc449-aae9-44fc-9ea3-9e7fe6119ec8" alt="2048" width="500" class="center"> </p>
 
 
 5. **Automatic move option**
 	- The automatic move option can be turned on/off from its settings page.
 	- If the option is on, the player can set the desired number of seconds of
 inactivity after which the game will move automatically.
-
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/98250b98-679a-4c35-ba85-b6045ca6d217" alt="2048" width="500" class="center">
-</p>
+	- <p> <img src="https://github.com/maria-alexandru/2048/assets/149622435/98250b98-679a-4c35-ba85-b6045ca6d217" alt="2048" width="500" class="center"> </p>
 
 
 ## Implementation
