@@ -27,10 +27,6 @@ a game was not previously started, you can not select this option.
 	- If you choose the 'Top Scores' option, you will be able to see the best
 eight scores, the time in which each was achieved, the name of the player who
 achieved it and if it was a win or a loss.
-
-<p>
-	<img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500" class="center">
-</p>
 	- If you enter the settings submenu, you will be able to modify the
 appearance of the game by choosing the desired theme, you can configure the
 automatic move option or you can return to the main menu. These will be the same
@@ -75,6 +71,10 @@ it is equal to one of them and has a shorter time.
 the first time the app was opened or if it is equal to the last high score and
 was achieved in a shorter time.
 	- Each game mode has different high/top scores.
+ 
+<p>
+	<img src="https://github.com/maria-alexandru/2048/assets/149622435/8038727b-db4d-4f2c-90db-88c583e23299" alt="2048" width="500" class="center">
+</p>
 
 4. **Theme color menu**
 	- The player has five options to choose from for the appearance of the game.
@@ -85,6 +85,7 @@ can select one by pressing ENTER.
 	<img src="https://github.com/maria-alexandru/2048/assets/149622435/dc6cc449-aae9-44fc-9ea3-9e7fe6119ec8" alt="2048" width="500" class="center">
 </p>
 
+
 5. **Automatic move option**
 	- The automatic move option can be turned on/off from its settings page.
 	- If the option is on, the player can set the desired number of seconds of
@@ -93,6 +94,7 @@ inactivity after which the game will move automatically.
 <p>
 	<img src="https://github.com/maria-alexandru/2048/assets/149622435/98250b98-679a-4c35-ba85-b6045ca6d217" alt="2048" width="500" class="center">
 </p>
+
 
 ## Implementation
 1. **First task**
